@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Enver Avisena</title>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="nav">
+
+<div class="nav-left">
+  <img class="avatar" src="/assets/avatar.png">
+</div>
+
+<div class="nav-center">
+  <a href="/">Latest</a>
+  <a href="/#popular">Popular</a>
+  <a href="/#favorites">Favorites</a>
+</div>
+
+<div>
+  <button id="themeToggle">☾</button>
+</div>
+
+</header>
+
+<section class="hero">
+
+<img src="/assets/avatar.png">
+
+<div>
+  <h1>Enver Avisena</h1>
+
+  <p>
+    Kernel Developer, Linux Sysadmin,
+    and low-level systems engineer.
+  </p>
+
+  <p>
+    I build infrastructure tools,
+    kernel experiments,
+    and debugging utilities.
+  </p>
+</div>
+
+</section>
+
+<h2>Latest</h2>
+
+<div class="grid">
+
+    <a class="card" href="/blog/kernel-debugging/">
+        <img src="/assets/kernel.jpg">
+
+        <div class="card-content">
+            <h3>Kernel Debugging Notes</h3>
+
+            <p>Notes about tracing Linux kernels using ftrace and perf.</p>
+
+            <div class="badges">
+                <span class="badge">favorite</span> <span class="badge">popular</span>
+            </div>
+        </div>
+    </a>
+    
+    <a class="card" href="/blog/rdma-notes/">
+        <img src="/assets/rdma.jpg">
+
+        <div class="card-content">
+            <h3>RDMA Notes</h3>
+
+            <p>RDMA latency and throughput experiments.</p>
+
+            <div class="badges">
+                <span class="badge">favorite</span> 
+            </div>
+        </div>
+    </a>
+    
+</div>
+
+<br><br>
+
+<h2 id="popular">Popular</h2>
+
+<a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br>
+
+<br><br>
+
+<h2 id="favorites">Favorites</h2>
+
+<a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br><a href="/blog/rdma-notes/">RDMA Notes</a><br>
+
+
+<script src="/script.js"></script>
+
+</div>
+
+</body>
+</html>

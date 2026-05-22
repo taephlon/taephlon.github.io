@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+<channel>
+<title>Enver Avisena</title>
+<link>https://yourusername.github.io</link>
+<description>Developer blog</description>
+
+    <item>
+        <title>Kernel Debugging Notes</title>
+        <link>https://yourusername.github.io/blog/kernel-debugging/</link>
+        <description>Notes about tracing Linux kernels using ftrace and perf.</description>
+    </item>
+    
+    <item>
+        <title>RDMA Notes</title>
+        <link>https://yourusername.github.io/blog/rdma-notes/</link>
+        <description>RDMA latency and throughput experiments.</description>
+    </item>
+    </channel></rss>
