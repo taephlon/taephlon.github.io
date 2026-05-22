@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Enver Avisena</title>
 
   <link rel="stylesheet" href="/style.css">
+
 </head>
 
 <body>
@@ -13,47 +22,92 @@
 
 <header class="nav">
 
-<div class="nav-left">
-  <img class="avatar" src="/assets/avatar.png">
-</div>
+  <div class="nav-left">
 
-<div class="nav-center">
-  <a href="/">Latest</a>
-  <a href="/#popular">Popular</a>
-  <a href="/#favorites">Favorites</a>
-</div>
+    <a href="/">
+      <img
+        class="avatar"
+        src="/assets/avatar.png"
+        alt="avatar"
+      >
+    </a>
 
-<div>
-  <button id="themeToggle">☾</button>
-</div>
+  </div>
+
+  <nav class="nav-center">
+
+    <a href="/">Latest</a>
+
+    <a href="/#popular">
+      Popular
+    </a>
+
+    <a href="/#favorites">
+      Favorites
+    </a>
+
+    <a href="/blog/">
+      Blog
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+
+    <button id="themeToggle">
+      ☾
+    </button>
+
+  </div>
 
 </header>
 
+<main>
+
 <section class="hero">
 
-<img src="/assets/avatar.png">
+  <img src="/assets/avatar.png" alt="avatar">
 
-<div>
-  <h1>Enver Avisena</h1>
+  <div>
+    <h1>Enver Avisena</h1>
 
-  <p>
-    Kernel Developer, Linux Sysadmin,
-    and low-level systems engineer.
-  </p>
+    <p class="hero-text">
+      Kernel Developer, Linux Sysadmin,
+      and Infrastructure Engineer.
+    </p>
 
-  <p>
-    I build infrastructure tools,
-    kernel experiments,
-    and debugging utilities.
-  </p>
-</div>
+    <p class="hero-sub">
+      I build Linux infrastructure tools,
+      kernel experiments, networking utilities,
+      and low-level systems software.
+    </p>
+
+    <div class="hero-links">
+      <a href="https://github.com/yourusername">
+        GitHub
+      </a>
+
+      <a href="/feed.xml">
+        RSS
+      </a>
+
+      <a href="/blog/">
+        Blog
+      </a>
+    </div>
+  </div>
 
 </section>
 
-<h2>Latest</h2>
+<section class="section">
 
-<div class="grid">
+  <div class="section-header">
+    <h2>Latest</h2>
+    <a href="/blog/">View all →</a>
+  </div>
 
+  <div class="grid">
+    
     <a class="card" href="/blog/kernel-debugging/">
         <img src="/assets/kernel.jpg">
 
@@ -82,24 +136,48 @@
         </div>
     </a>
     
+  </div>
+
+</section>
+
+<section class="section" id="popular">
+
+  <div class="section-header">
+    <h2>Popular</h2>
+  </div>
+
+  <div class="mini-list">
+    <a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br>
+  </div>
+
+</section>
+
+<section class="section" id="favorites">
+
+  <div class="section-header">
+    <h2>Favorites</h2>
+  </div>
+
+  <div class="mini-list">
+    <a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br><a href="/blog/rdma-notes/">RDMA Notes</a><br>
+  </div>
+
+</section>
+
+
+</main>
+
+<footer class="footer">
+
+  <p>
+    © 2026 Enver Avisena
+  </p>
+
+</footer>
+
 </div>
-
-<br><br>
-
-<h2 id="popular">Popular</h2>
-
-<a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br>
-
-<br><br>
-
-<h2 id="favorites">Favorites</h2>
-
-<a href="/blog/kernel-debugging/">Kernel Debugging Notes</a><br><a href="/blog/rdma-notes/">RDMA Notes</a><br>
-
 
 <script src="/script.js"></script>
-
-</div>
 
 </body>
 </html>
