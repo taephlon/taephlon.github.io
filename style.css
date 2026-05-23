@@ -21,9 +21,15 @@ body {
   font-weight: 500;
 }
 
-.avatar, .hero-avatar {
+.avatar {
   width: 40px;
   height: 40px;
+  border-radius: 8px;
+}
+
+.hero-avatar {
+  width: 200px;
+  height: 200px;
   border-radius: 8px;
 }
 
