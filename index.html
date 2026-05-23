@@ -1,24 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dev Blog</title>
+  <title>Digital Garden</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav>
-  <div>
-    <strong>Dev Blog</strong>
+<!-- NAVBAR -->
+<header class="nav">
+  <div class="nav-left">
+    <img class="avatar" src="assets/avatar.png" />
   </div>
 
-  <input id="search" class="search" placeholder="Search...">
+  <nav class="nav-center">
+    <a href="#latest">Latest</a>
+    <a href="#popular">Popular</a>
+    <a href="#favorites">My Favorites</a>
+  </nav>
 
-  <button onclick="cycleTheme()">theme</button>
-</nav>
+  <div class="nav-right">
+    <a href="#contact">Contact</a>
+  </div>
+</header>
 
-<main>
-  
+<!-- HERO -->
+<section class="hero">
+  <img class="hero-avatar" src="assets/avatar.png" />
+  <div>
+    <h1>Hi, I'm Enver 👋</h1>
+    <p>
+      I build systems, write about Linux, kernel work, and create experimental developer tools.
+      This is my digital garden & project hub.
+    </p>
+  </div>
+</section>
+
+<!-- LATEST SECTION -->
+<section id="latest">
+  <h2>Latest</h2>
+  <p class="sub">Here’s the newest things I’ve published</p>
+
+  <div class="grid">
+    
       <article class="card">
         <h2>Kernel Debugging Basics</h2>
         <small>Fri May 22 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</small>
@@ -26,11 +50,8 @@
         <a href="test.html">Read →</a>
       </article>
     
-</main>
-
-<footer>
-  built with a static generator
-</footer>
+  </div>
+</section>
 
 </body>
 </html>
