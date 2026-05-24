@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── SEO ──────────────────────────────────────────────────── -->
+  <title>My Blog — Thoughts on Code, Hardware & Life</title>
+  <meta name="description" content="A personal blog about Linux, keyboards, productivity, programming, and everything in between.">
+  <meta name="keywords" content="linux, programming, hardware, keyboards, productivity, cli, debugging, blog">
+  <meta name="author" content="Enver Avisena">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://taephlon.github.io/">
+
+  <!-- ── Open Graph ────────────────────────────────────────────── -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="My Blog — Thoughts on Code, Hardware & Life">
+  <meta property="og:description" content="A personal blog about Linux, keyboards, productivity, programming, and everything in between.">
+  <meta property="og:url" content="https://taephlon.github.io/">
+  <meta property="og:image" content="https://taephlon.github.io/assets/og-image.png">
+  <meta property="og:site_name" content="My Blog">
+
+  <!-- ── Twitter Card ──────────────────────────────────────────── -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="My Blog">
+  <meta name="twitter:description" content="A personal blog about Linux, keyboards, productivity, programming, and everything in between.">
+  <meta name="twitter:image" content="https://taephlon.github.io/assets/og-image.png">
+
+  <!-- ── JSON-LD Site Schema ───────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "My Blog",
+    "description": "A personal blog about Linux, keyboards, productivity, programming, and everything in between.",
+    "url": "https://taephlon.github.io/",
+    "author": {
+      "@type": "Person",
+      "name": "Enver Avisena"
+    }
+  }
+  </script>
+
+  <!-- ── Fonts ─────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- ── Styles ────────────────────────────────────────────────── -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+
+  <!-- ── Sitemap hint ──────────────────────────────────────────── -->
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+</head>
+
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────── -->
+  <nav aria-label="Main navigation">
+    <a href="./index.html" class="nav-logo">
+      <span></span> My Blog
+    </a>
+    <div class="nav-links">
+      <a href="#recent">Recent</a>
+      <a href="#popular">Popular</a>
+      <a href="#favorites">Favorites</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <h1>Writing about <em>things</em><br>that matter to me.</h1>
+    <p>Linux internals, mechanical keyboards, productivity systems, and the occasional life update. No ads. No newsletter. Just writing.</p>
+  </header>
+
+  <!-- ── Tag Filter ───────────────────────────────────────────────── -->
+  <section class="tag-section" aria-label="Filter by tag">
+    <p class="tag-label">Filter by topic</p>
+    <div class="tag-list" id="tag-list" role="group" aria-label="Topic tags"></div>
+  </section>
+
+  <!-- ── Recent ───────────────────────────────────────────────────── -->
+  <section class="section" id="recent" aria-labelledby="recent-title">
+    <div class="section-header">
+      <h2 class="section-title" id="recent-title">Recent</h2>
+      <span class="section-badge">Latest posts</span>
+    </div>
+    <div class="card-grid" id="recent-grid" role="list">
+      <div class="empty"><p>Loading posts…</p></div>
+    </div>
+  </section>
+
+  <!-- ── Popular ──────────────────────────────────────────────────── -->
+  <section class="section" id="popular" aria-labelledby="popular-title">
+    <div class="section-header">
+      <h2 class="section-title" id="popular-title">Popular</h2>
+      <span class="section-badge">Most read</span>
+    </div>
+    <div class="card-grid" id="popular-grid" role="list">
+      <div class="empty"><p>Loading posts…</p></div>
+    </div>
+  </section>
+
+  <!-- ── Favorites ────────────────────────────────────────────────── -->
+  <section class="section" id="favorites" aria-labelledby="favorites-title">
+    <div class="section-header">
+      <h2 class="section-title" id="favorites-title">My Favorites</h2>
+      <span class="section-badge">Hand-picked</span>
+    </div>
+    <div class="card-grid" id="favorites-grid" role="list">
+      <div class="empty"><p>Loading posts…</p></div>
+    </div>
+  </section>
+
+  <!-- ── Footer ───────────────────────────────────────────────────── -->
+  <footer>
+    <p>© <span id="year"></span> My Blog. Built with HTML, CSS & vanilla JS.</p>
+    <p>Hosted on <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a></p>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script src="./assets/js/main.js"></script>
+</body>
+</html>

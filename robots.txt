@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://taephlon.github.io/sitemap.xml
