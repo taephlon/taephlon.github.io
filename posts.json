@@ -1,0 +1,30 @@
+[
+  {
+    "title": "Kernel Debugging pfft",
+    "date": "2026-05-22T00:00:00.000Z",
+    "thumbnail": "./assets/kernel.jpg",
+    "tags": [
+      "linux",
+      "kernel",
+      "debugging"
+    ],
+    "popular": true,
+    "favorite": true,
+    "description": "",
+    "content": "\nThis is just a test\n",
+    "slug": "kernel-test.html",
+    "link": "/posts/kernel-test.html"
+  },
+  {
+    "title": "Kernel Debugging Basics",
+    "date": "2026-05-22T00:00:00.000Z",
+    "thumbnail": "/assets/default.jpg",
+    "tags": [],
+    "popular": false,
+    "favorite": false,
+    "description": "",
+    "content": "\n# Kernel Debugging Basics\n\nToday I worked on debugging a kernel module using `dmesg` and `printk`.\n\nIt helped me understand how the kernel logs work.\n",
+    "slug": "test.html",
+    "link": "/posts/test.html"
+  }
+]
