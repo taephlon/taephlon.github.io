@@ -1,12 +1,31 @@
 [
   {
+    "id": 7,
+    "slug": "test",
+    "title": "test",
+    "date": "2026-05-24",
+    "description": "this is just a test",
+    "thumbnail": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80",
+    "tags": [
+      "test"
+    ],
+    "popular": false,
+    "favorite": true,
+    "readTime": "1 min read",
+    "content": "test \nend"
+  },
+  {
     "id": 1,
     "slug": "getting-started-with-linux-kernel-debugging",
     "title": "Getting Started with Linux Kernel Debugging",
     "date": "2025-05-10",
     "description": "A deep dive into the tools, techniques, and mindset needed to debug the Linux kernel effectively — from printk to KGDB.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": ["linux", "debugging", "systems"],
+    "tags": [
+      "linux",
+      "debugging",
+      "systems"
+    ],
     "popular": true,
     "favorite": false,
     "readTime": "8 min read",
@@ -19,7 +38,11 @@
     "date": "2025-04-22",
     "description": "From PCB selection to switch lubing to QMK firmware — everything I learned building my first fully custom keyboard.",
     "thumbnail": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=600&q=80",
-    "tags": ["hardware", "diy", "keyboards"],
+    "tags": [
+      "hardware",
+      "diy",
+      "keyboards"
+    ],
     "popular": false,
     "favorite": true,
     "readTime": "12 min read",
@@ -32,7 +55,11 @@
     "date": "2025-03-15",
     "description": "After years of cable chaos and gear hoarding, I stripped everything down to the essentials. Here's what survived the cut.",
     "thumbnail": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&q=80",
-    "tags": ["productivity", "setup", "lifestyle"],
+    "tags": [
+      "productivity",
+      "setup",
+      "lifestyle"
+    ],
     "popular": true,
     "favorite": true,
     "readTime": "5 min read",
@@ -45,7 +72,11 @@
     "date": "2025-02-08",
     "description": "HTTP is request-response. WebSockets are persistent. Here's how they actually work at the protocol level.",
     "thumbnail": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80",
-    "tags": ["networking", "web", "programming"],
+    "tags": [
+      "networking",
+      "web",
+      "programming"
+    ],
     "popular": false,
     "favorite": false,
     "readTime": "10 min read",
@@ -58,7 +89,11 @@
     "date": "2025-01-19",
     "description": "I used to avoid the command line at all costs. Now it's the first thing I open every morning. Here's what changed.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": ["linux", "productivity", "cli"],
+    "tags": [
+      "linux",
+      "productivity",
+      "cli"
+    ],
     "popular": true,
     "favorite": false,
     "readTime": "7 min read",
@@ -71,7 +106,11 @@
     "date": "2024-12-30",
     "description": "Not all Zsh plugins are worth installing. Here are the ones I actually use daily and why they earn their place.",
     "thumbnail": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80",
-    "tags": ["cli", "linux", "productivity"],
+    "tags": [
+      "cli",
+      "linux",
+      "productivity"
+    ],
     "popular": false,
     "favorite": true,
     "readTime": "6 min read",
