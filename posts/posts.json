@@ -12,30 +12,6 @@
     "file": "posts/content/getting-started-with-linux-kernel-debugging.md"
   },
   {
-    "slug": "building-a-custom-mechanical-keyboard",
-    "title": "Building a Custom Mechanical Keyboard from Scratch",
-    "date": "2025-04-22",
-    "description": "From PCB selection to switch lubing to QMK firmware — everything I learned building my first fully custom keyboard.",
-    "thumbnail": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=600&q=80",
-    "tags": ["hardware", "diy", "keyboards"],
-    "popular": false,
-    "favorite": true,
-    "readTime": "12 min read",
-    "file": "posts/content/building-a-custom-mechanical-keyboard.md"
-  },
-  {
-    "slug": "my-minimalist-desk-setup-2025",
-    "title": "My Minimalist Desk Setup in 2025",
-    "date": "2025-03-15",
-    "description": "After years of cable chaos and gear hoarding, I stripped everything down to the essentials. Here's what survived the cut.",
-    "thumbnail": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&q=80",
-    "tags": ["productivity", "setup", "lifestyle"],
-    "popular": true,
-    "favorite": true,
-    "readTime": "5 min read",
-    "file": "posts/content/my-minimalist-desk-setup-2025.md"
-  },
-  {
     "slug": "understanding-websockets-from-scratch",
     "title": "Understanding WebSockets from Scratch",
     "date": "2025-02-08",
