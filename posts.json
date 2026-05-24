@@ -12,8 +12,8 @@
     "favorite": true,
     "description": "",
     "content": "\nThis is just a test\n",
-    "slug": "kernel-test.html",
-    "link": "/posts/kernel-test.html"
+    "slug": "kernel-debugging-pfft",
+    "link": "/posts/kernel-debugging-pfft.html"
   },
   {
     "title": "Kernel Debugging Basics",
@@ -24,7 +24,7 @@
     "favorite": false,
     "description": "",
     "content": "\n# Kernel Debugging Basics\n\nToday I worked on debugging a kernel module using `dmesg` and `printk`.\n\nIt helped me understand how the kernel logs work.\n",
-    "slug": "test.html",
-    "link": "/posts/test.html"
+    "slug": "kernel-debugging-basics",
+    "link": "/posts/kernel-debugging-basics.html"
   }
 ]
