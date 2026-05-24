@@ -8,31 +8,23 @@ const fs   = require('fs');
 const path = require('path');
 const rl   = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 
-const POSTS_FILE = path.join(__dirname, '../posts/posts.json');
+const POSTS_FILE    = path.join(__dirname, '../posts/posts.json');
+const CONTENT_DIR   = path.join(__dirname, '../posts/content');
 
-// ── Helpers ────────────────────────────────────────────────────
 const ask = (q) => new Promise(res => rl.question(q, res));
 
 function slugify(str) {
-  return str
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return str.toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function today() {
-  return new Date().toISOString().split('T')[0];
-}
+function today() { return new Date().toISOString().split('T')[0]; }
 
 function estimateReadTime(content) {
-  const words = content.split(/\s+/).length;
-  const minutes = Math.max(1, Math.round(words / 200));
+  const minutes = Math.max(1, Math.round(content.split(/\s+/).length / 200));
   return `${minutes} min read`;
 }
 
-// ── Main ────────────────────────────────────────────────────────
 async function main() {
   console.log('\n✦ New Blog Post\n' + '─'.repeat(40));
 
@@ -43,23 +35,26 @@ async function main() {
   const popular     = (await ask('Mark as popular? (y/n): ')).toLowerCase() === 'y';
   const favorite    = (await ask('Mark as favorite? (y/n): ')).toLowerCase() === 'y';
 
-  console.log('\nPaste your post content (HTML or plain text).');
+  console.log('\nPaste your Markdown content.');
   console.log('Type END on a new line when done:\n');
 
-  let contentLines = [];
-  for await (const line of readLines()) {
+  let lines = [];
+  for await (const line of rl) {
     if (line.trim() === 'END') break;
-    contentLines.push(line);
+    lines.push(line);
   }
-  const content = contentLines.join('\n');
+  const markdown = lines.join('\n');
+  const slug = slugify(title);
 
-  // ── Build post object ────────────────────────────────────────
+  // Write .md file
+  if (!fs.existsSync(CONTENT_DIR)) fs.mkdirSync(CONTENT_DIR, { recursive: true });
+  const mdPath = path.join(CONTENT_DIR, `${slug}.md`);
+  fs.writeFileSync(mdPath, markdown);
+
+  // Update posts.json
   const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
-  const maxId  = posts.reduce((m, p) => Math.max(m, p.id), 0);
-
-  const newPost = {
-    id:          maxId + 1,
-    slug:        slugify(title),
+  posts.unshift({
+    slug,
     title:       title.trim(),
     date:        today(),
     description: description.trim(),
@@ -67,29 +62,16 @@ async function main() {
     tags:        tagsRaw.split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
     popular,
     favorite,
-    readTime:    estimateReadTime(content),
-    content:     content.trim()
-  };
-
-  posts.unshift(newPost); // newest first
+    readTime:    estimateReadTime(markdown),
+    file:        `posts/content/${slug}.md`
+  });
   fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
 
-  console.log('\n✅ Post created!');
-  console.log(`   Slug: ${newPost.slug}`);
-  console.log(`   URL:  post.html?slug=${newPost.slug}`);
-  console.log(`   File: posts/posts.json updated\n`);
-
+  console.log(`\n✅ Post created!`);
+  console.log(`   Markdown: posts/content/${slug}.md`);
+  console.log(`   URL:      post.html?slug=${slug}\n`);
   rl.close();
 }
 
-// ── Async line reader helper ───────────────────────────────────
-async function* readLines() {
-  for await (const line of rl) {
-    yield line;
-  }
-}
-
-main().catch(err => {
-  console.error('Error:', err.message);
-  process.exit(1);
-});
+async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
+main().catch(e => { console.error(e.message); process.exit(1); });

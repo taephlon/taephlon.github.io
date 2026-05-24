@@ -1,85 +1,74 @@
 [
   {
-    "id": 7,
-    "slug": "test",
-    "title": "test",
-    "date": "2026-05-24",
-    "description": "this is just a test",
-    "thumbnail": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80",
-    "tags": [
-      "test"
-    ],
-    "popular": false,
-    "favorite": true,
-    "readTime": "1 min read",
-    "content": "test \nend"
-  },
-  {
-    "id": 1,
     "slug": "getting-started-with-linux-kernel-debugging",
     "title": "Getting Started with Linux Kernel Debugging",
     "date": "2025-05-10",
     "description": "A deep dive into the tools, techniques, and mindset needed to debug the Linux kernel effectively — from printk to KGDB.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": [
-      "linux",
-      "debugging",
-      "systems"
-    ],
+    "tags": ["linux", "debugging", "systems"],
     "popular": true,
     "favorite": false,
     "readTime": "8 min read",
-    "content": "<h2>Introduction</h2><p>Debugging the Linux kernel can feel like spelunking in a cavern with no map. This guide walks you through the essential tools you need to understand what's happening deep inside the OS.</p><h2>printk: Your First Friend</h2><p>Before jumping to advanced tools, <code>printk()</code> is your baseline. It's the kernel equivalent of <code>printf</code> and gives you raw visibility into execution flow.</p><pre><code>printk(KERN_DEBUG \"value: %d\\n\", val);</code></pre><h2>KGDB: Full Kernel Debugger</h2><p>KGDB lets you attach GDB to a live kernel over serial or network. Set it up with a second machine (or a VM) and you gain full breakpoint and watchpoint support.</p><p>Configure your kernel with <code>CONFIG_KGDB=y</code>, then boot with <code>kgdboc=ttyS0,115200 kgdbwait</code>.</p><h2>ftrace and perf</h2><p>For performance issues and tracing call paths, <code>ftrace</code> and <code>perf</code> are indispensable. They let you trace function calls, record events, and generate flame graphs with almost no overhead.</p><h2>Conclusion</h2><p>Kernel debugging is a skill you build over time. Start with printk, graduate to KGDB, and learn ftrace when you need systemic insight. Happy debugging.</p>"
+    "file": "posts/content/getting-started-with-linux-kernel-debugging.md"
   },
   {
-    "id": 4,
+    "slug": "building-a-custom-mechanical-keyboard",
+    "title": "Building a Custom Mechanical Keyboard from Scratch",
+    "date": "2025-04-22",
+    "description": "From PCB selection to switch lubing to QMK firmware — everything I learned building my first fully custom keyboard.",
+    "thumbnail": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=600&q=80",
+    "tags": ["hardware", "diy", "keyboards"],
+    "popular": false,
+    "favorite": true,
+    "readTime": "12 min read",
+    "file": "posts/content/building-a-custom-mechanical-keyboard.md"
+  },
+  {
+    "slug": "my-minimalist-desk-setup-2025",
+    "title": "My Minimalist Desk Setup in 2025",
+    "date": "2025-03-15",
+    "description": "After years of cable chaos and gear hoarding, I stripped everything down to the essentials. Here's what survived the cut.",
+    "thumbnail": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&q=80",
+    "tags": ["productivity", "setup", "lifestyle"],
+    "popular": true,
+    "favorite": true,
+    "readTime": "5 min read",
+    "file": "posts/content/my-minimalist-desk-setup-2025.md"
+  },
+  {
     "slug": "understanding-websockets-from-scratch",
     "title": "Understanding WebSockets from Scratch",
     "date": "2025-02-08",
     "description": "HTTP is request-response. WebSockets are persistent. Here's how they actually work at the protocol level.",
     "thumbnail": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80",
-    "tags": [
-      "networking",
-      "web",
-      "programming"
-    ],
+    "tags": ["networking", "web", "programming"],
     "popular": false,
     "favorite": false,
     "readTime": "10 min read",
-    "content": "<h2>The Problem with HTTP</h2><p>HTTP is stateless and request-driven. The client asks, the server answers, and the connection closes. For real-time apps — chat, live data, games — this is painfully inefficient.</p><h2>The WebSocket Handshake</h2><p>WebSockets start as an HTTP request with an <code>Upgrade: websocket</code> header. If the server agrees, it responds with a 101 Switching Protocols and the connection upgrades to a persistent, full-duplex channel.</p><pre><code>GET /chat HTTP/1.1\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Key: dGhlIHNhbXBsZQ==</code></pre><h2>Frames, not Packets</h2><p>WebSocket data is sent in <em>frames</em>. Each frame has an opcode (text, binary, ping, pong, close), a masking key (client→server), and the payload.</p><h2>Building a Simple Server</h2><p>In Node.js, the <code>ws</code> library handles all the framing for you. A minimal echo server is under 10 lines of code.</p><h2>When to Use Them</h2><p>Use WebSockets for chat, collaborative editing, live dashboards, multiplayer games. For simple notifications, Server-Sent Events may be simpler. For REST data, stick to HTTP.</p>"
+    "file": "posts/content/understanding-websockets-from-scratch.md"
   },
   {
-    "id": 5,
     "slug": "how-i-learned-to-love-the-terminal",
     "title": "How I Learned to Love the Terminal",
     "date": "2025-01-19",
     "description": "I used to avoid the command line at all costs. Now it's the first thing I open every morning. Here's what changed.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": [
-      "linux",
-      "productivity",
-      "cli"
-    ],
+    "tags": ["linux", "productivity", "cli"],
     "popular": true,
     "favorite": false,
     "readTime": "7 min read",
-    "content": "<h2>Fear of the Blinking Cursor</h2><p>My first encounter with the terminal was a disaster. I typed the wrong <code>rm</code> command and wiped a folder. I swore it off for two years.</p><h2>The Turning Point</h2><p>A friend showed me <code>fzf</code> for fuzzy file search. I was hooked instantly. From there I discovered <code>ripgrep</code>, <code>bat</code>, <code>exa</code>, and eventually <code>tmux</code>.</p><h2>Building My Config</h2><p>I spent a weekend building a dotfiles repo. Zsh with <code>starship</code> prompt, aliases for common git operations, and a custom <code>PATH</code> setup. The investment paid back immediately.</p><h2>The Mindset Shift</h2><p>The terminal rewards curiosity. Every tool has a man page. Every command composes with others via pipes. Once that clicks, you stop seeing it as intimidating and start seeing it as expressive.</p><h2>Where to Start</h2><p>Learn <code>cd</code>, <code>ls</code>, <code>cat</code>, <code>grep</code>, <code>find</code> and basic pipes. Then customize your prompt. The rest follows naturally.</p>"
+    "file": "posts/content/how-i-learned-to-love-the-terminal.md"
   },
   {
-    "id": 6,
     "slug": "a-field-guide-to-zsh-plugins",
     "title": "A Field Guide to Zsh Plugins",
     "date": "2024-12-30",
     "description": "Not all Zsh plugins are worth installing. Here are the ones I actually use daily and why they earn their place.",
     "thumbnail": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80",
-    "tags": [
-      "cli",
-      "linux",
-      "productivity"
-    ],
+    "tags": ["cli", "linux", "productivity"],
     "popular": false,
     "favorite": true,
     "readTime": "6 min read",
-    "content": "<h2>Why Plugins Matter</h2><p>Out of the box, Zsh is already excellent. Plugins push it into another tier — autocomplete that actually works, syntax highlighting mid-command, smarter history search.</p><h2>The Essential Five</h2><p><strong>zsh-autosuggestions</strong> — shows ghost completions from history as you type. Accept with →. Saves hundreds of keystrokes daily.</p><p><strong>zsh-syntax-highlighting</strong> — colors commands green when valid, red when not. Catches typos before you hit Enter.</p><p><strong>fzf-tab</strong> — replaces the default tab completion with a fuzzy finder. Transformative.</p><p><strong>z (zoxide)</strong> — smarter <code>cd</code> that learns your most-visited directories. Jump anywhere with 2-3 characters.</p><p><strong>you-should-use</strong> — gently reminds you when an alias exists for what you just typed. Builds muscle memory fast.</p><h2>Plugin Manager: Zinit</h2><p>I use Zinit for lazy loading and fast startup. My shell loads in under 100ms with 12 plugins enabled.</p>"
+    "file": "posts/content/a-field-guide-to-zsh-plugins.md"
   }
 ]

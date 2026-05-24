@@ -8,7 +8,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const BASE_URL   = 'https://taephlon.github.io'; // ← CHANGE THIS
+const BASE_URL   = 'https://yourusername.github.io'; // ← CHANGE THIS
 const POSTS_FILE = path.join(__dirname, '../posts/posts.json');
 const OUT_FILE   = path.join(__dirname, '../sitemap.xml');
 
