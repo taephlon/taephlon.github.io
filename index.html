@@ -17,6 +17,7 @@
     <a href="#latest">Latest</a>
     <a href="#popular">Popular</a>
     <a href="#favorites">My Favorites</a>
+    <a href="#tags">Tags</a>
   </nav>
 
   <div class="nav-right">
@@ -36,13 +37,33 @@
   </div>
 </section>
 
+<section id="tags">
+  <h2 class="section-title">Tags</h2>
+
+  <div class="tags">
+    ${allTags.map(tag => `
+      <a href="tags/${tag}.html" class="tag">
+        #${tag}
+      </a>
+    `).join("")}
+  </div>
+</section>
+
 <!-- LATEST SECTION -->
 <section id="latest">
-  <h2>Latest</h2>
-  <p class="sub">Here’s the newest things I’ve published</p>
-
+   <h2 class="section-title">Latest</h2>
+  <p class="section-subtitle">
+  Here’s the newest things I’ve published</p>
   <div class="grid">
     
+      <article class="card">
+        <h2>Kernel Debugging Basics</h2>
+        <small>Fri May 22 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</small>
+        <p></p>
+        <a href="kernel-test.html">Read →</a>
+      </article>
+    
+
       <article class="card">
         <h2>Kernel Debugging Basics</h2>
         <small>Fri May 22 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</small>
@@ -51,6 +72,25 @@
       </article>
     
   </div>
+</section>
+
+<section id="popular">
+  <h2 class="section-title">Popular</h2>
+</section>
+
+<section id="favorite">
+  <h2 class="section-title">My Favorite</h2>
+</section>
+
+<section id="contact" class="contact-section">
+  <h2>Contact</h2>
+
+  <p>Email: enver@example.com</p>
+  <p>GitHub: taephlon</p>
+
+  <a href="mailto:enver@example.com" class="contact-btn">
+    Contact Me
+  </a>
 </section>
 
 </body>
