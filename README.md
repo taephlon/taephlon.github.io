@@ -176,23 +176,21 @@ Google will start indexing your posts within days to weeks.
 
 ## Writing post content
 
-The `content` field in `posts.json` supports HTML. Use these tags:
+The `content` field in `posts.json` supports Markdown. Use these tags:
 
-```html
-<h2>Section Heading</h2>
-<h3>Subsection</h3>
-<p>Paragraph text.</p>
-<strong>Bold</strong>
-<em>Italic</em>
-<code>inline code</code>
-<pre><code>
-// code block
-function example() {}
-</code></pre>
-<blockquote>A quote or callout.</blockquote>
-<ul><li>List item</li></ul>
-<a href="https://...">Link text</a>
-```
+## Headings, ### Subheadings
+
+**bold**, *italic*, ***both***
+
+`inline code` and ```code blocks```
+
+- unordered and "1. ordered lists"
+
+[links](url)
+
+> blockquotes
+
+--- horizontal rules
 
 ---
 
