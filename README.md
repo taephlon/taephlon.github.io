@@ -192,6 +192,8 @@ The `content` field in `posts.json` supports Markdown. Use these tags:
 
 --- horizontal rules
 
+adding image : ![Alt text](https://images.unsplash.com/photo-xxx?w=800&q=80) or ![Alt text](./images/my-photo.jpg)
+
 ---
 
 ## License

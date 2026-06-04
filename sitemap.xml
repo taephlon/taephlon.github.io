@@ -1,43 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://taephlon.github.io/</loc>
-    <lastmod>2026-05-24</lastmod>
+    <loc>https://yourusername.github.io/</loc>
+    <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://taephlon.github.io/post.html?slug=test</loc>
-    <lastmod>2026-05-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://taephlon.github.io/post.html?slug=getting-started-with-linux-kernel-debugging</loc>
+    <loc>https://yourusername.github.io/post.html?slug=getting-started-with-linux-kernel-debugging</loc>
     <lastmod>2025-05-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://taephlon.github.io/post.html?slug=my-minimalist-desk-setup-2025</loc>
-    <lastmod>2025-03-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://taephlon.github.io/post.html?slug=understanding-websockets-from-scratch</loc>
+    <loc>https://yourusername.github.io/post.html?slug=understanding-websockets-from-scratch</loc>
     <lastmod>2025-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://taephlon.github.io/post.html?slug=how-i-learned-to-love-the-terminal</loc>
+    <loc>https://yourusername.github.io/post.html?slug=how-i-learned-to-love-the-terminal</loc>
     <lastmod>2025-01-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://taephlon.github.io/post.html?slug=a-field-guide-to-zsh-plugins</loc>
+    <loc>https://yourusername.github.io/post.html?slug=a-field-guide-to-zsh-plugins</loc>
     <lastmod>2024-12-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
