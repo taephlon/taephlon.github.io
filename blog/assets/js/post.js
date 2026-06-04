@@ -1,3 +1,59 @@
+// ── Markdown → HTML parser ──────────────────────────────────────
+function parseMarkdown(md) {
+  let html = md
+    // Escape HTML entities first
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+    // Code blocks (``` ... ```) — do before inline code
+    .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre><code class="language-${lang}">${code.trimEnd()}</code></pre>`)
+
+    // Headings
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+
+    // Bold & italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+
+    // Blockquotes
+    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
+
+    // Unordered lists
+    .replace(/(^- .+(\n- .+)*)/gm, block => {
+      const items = block.split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    })
+
+    // Ordered lists
+    .replace(/(^\d+\. .+(\n\d+\. .+)*)/gm, block => {
+      const items = block.split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    })
+
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr>')
+
+    // Paragraphs — wrap lines that aren't already block elements
+    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre)(.+)$/gm, '<p>$1</p>')
+
+    // Clean up empty paragraphs
+    .replace(/<p>\s*<\/p>/g, '')
+
+    // Collapse multiple blank lines
+    .replace(/\n{3,}/g, '\n\n');
+
+  return html;
+}
+
 // ── Post Reader Engine ──────────────────────────────────────────
 const POSTS_URL = './posts/posts.json';
 
@@ -5,10 +61,7 @@ async function loadPost() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
 
-  if (!slug) {
-    window.location.href = './index.html';
-    return;
-  }
+  if (!slug) { window.location.href = './index.html'; return; }
 
   try {
     const res = await fetch(POSTS_URL);
@@ -23,33 +76,36 @@ async function loadPost() {
       return;
     }
 
-    renderPost(post, posts);
+    // Fetch the .md file
+    const mdRes = await fetch('./' + post.file);
+    if (!mdRes.ok) throw new Error('Could not load markdown file: ' + post.file);
+    const markdown = await mdRes.text();
+    const contentHTML = parseMarkdown(markdown);
+
+    renderPost(post, contentHTML, posts);
     updateSEO(post);
     initScrollProgress();
 
   } catch (e) {
     console.error(e);
+    document.getElementById('post-body').innerHTML =
+      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
   }
 }
 
-function renderPost(post, allPosts) {
+function renderPost(post, contentHTML, allPosts) {
   const dateStr = new Date(post.date).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  // Hero
   document.getElementById('post-hero-img').src = post.thumbnail;
   document.getElementById('post-hero-img').alt = post.title;
   document.getElementById('post-title').textContent = post.title;
   document.getElementById('post-date').textContent = dateStr;
   document.getElementById('post-readtime').textContent = post.readTime;
-
-  // Tags
   document.getElementById('post-tags').innerHTML =
     post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
-
-  // Body
-  document.getElementById('post-body').innerHTML = post.content;
+  document.getElementById('post-body').innerHTML = contentHTML;
 
   // Related posts
   const related = allPosts
@@ -64,9 +120,7 @@ function renderPost(post, allPosts) {
           <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
         </div>
         <div class="card-body">
-          <div class="card-tags">
-            ${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
-          </div>
+          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
           <h3 class="card-title">${p.title}</h3>
           <div class="card-meta">
             <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
@@ -80,28 +134,21 @@ function renderPost(post, allPosts) {
             <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
           </svg>
         </div>
-      </a>
-    `).join('');
+      </a>`).join('');
   } else {
     relatedEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No related posts found.</p>';
   }
 }
 
-// ── SEO ─────────────────────────────────────────────────────────
+// ── SEO ──────────────────────────────────────────────────────────
 function updateSEO(post) {
   document.title = `${post.title} — My Blog`;
-
   const setMeta = (name, content, prop = false) => {
     const attr = prop ? 'property' : 'name';
     let el = document.querySelector(`meta[${attr}="${name}"]`);
-    if (!el) {
-      el = document.createElement('meta');
-      el.setAttribute(attr, name);
-      document.head.appendChild(el);
-    }
+    if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
     el.setAttribute('content', content);
   };
-
   setMeta('description', post.description);
   setMeta('keywords', post.tags.join(', '));
   setMeta('og:title', post.title, true);
@@ -113,33 +160,19 @@ function updateSEO(post) {
   setMeta('twitter:description', post.description);
   setMeta('twitter:image', post.thumbnail);
 
-  // Canonical URL
   let canonical = document.querySelector('link[rel="canonical"]');
-  if (!canonical) {
-    canonical = document.createElement('link');
-    canonical.rel = 'canonical';
-    document.head.appendChild(canonical);
-  }
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
   canonical.href = window.location.href.split('?')[0] + `?slug=${post.slug}`;
 
-  // JSON-LD structured data
   const ld = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.description,
-    image: post.thumbnail,
-    datePublished: post.date,
+    '@context': 'https://schema.org', '@type': 'BlogPosting',
+    headline: post.title, description: post.description,
+    image: post.thumbnail, datePublished: post.date,
     author: { '@type': 'Person', name: 'Your Name' },
     keywords: post.tags.join(', ')
   };
   let ldScript = document.getElementById('ld-json');
-  if (!ldScript) {
-    ldScript = document.createElement('script');
-    ldScript.id = 'ld-json';
-    ldScript.type = 'application/ld+json';
-    document.head.appendChild(ldScript);
-  }
+  if (!ldScript) { ldScript = document.createElement('script'); ldScript.id = 'ld-json'; ldScript.type = 'application/ld+json'; document.head.appendChild(ldScript); }
   ldScript.textContent = JSON.stringify(ld);
 }
 
@@ -147,10 +180,8 @@ function updateSEO(post) {
 function initScrollProgress() {
   const bar = document.getElementById('post-progress');
   window.addEventListener('scroll', () => {
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    bar.style.width = pct + '%';
+    const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    bar.style.width = Math.min(pct, 100) + '%';
   }, { passive: true });
 }
 
