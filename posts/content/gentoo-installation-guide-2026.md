@@ -15,10 +15,12 @@ Establish standard network visibility. Opt for interactive configuration or spin
 
 ```bash
 
-# 1. Set-up your network connection
+## 1. Set-up your network connection
+
 net-setup
 
-# 2. Set up the sshd if u want to use ssh connection
+## 2. Set up the sshd if u want to use ssh connection
+
 passwd root
 rc-service sshd start
 
@@ -38,10 +40,11 @@ cfdisk /dev/nvme0n1
 
 Commit changes to disk, apply the target filesystems, and initialize the swap memory space:
 ```bash
-# Verify target nodes
+
+## Verify target nodes
 lsblk
 
-# Format filesystems
+## Format filesystems
 mkfs.vfat /dev/nvme0n1p1
 mkswap /dev/nvme0n1p2
 swapon /dev/nvme0n1p2
@@ -122,17 +125,17 @@ env-update && source /etc/profile
 Prior to pulling down the compiled binary kernel, integrate the central hardware firmware trees. Because these bundles hold proprietary blobs, amend the portage licensing restrictions first.
 
 ```bash
-# Unshackle license parameters
+## Unshackle license parameters
 nano /etc/portage/package.license
 
-# Pull down core system drivers
+## Pull down core system drivers
 emerge --ask sys-kernel/linux-firmware
 ```
 
 Instruct Portage to build the system kernel while passing hooks over to `grub` and `dracut`:
 ```bash
 nano /etc/portage/package.use/installkernel
-# Append the following definition: sys-kernel/installkernel grub dracut
+## Append the following definition: sys-kernel/installkernel grub dracut
 ```
 
 ### Initial Ramdisk Customization
@@ -188,11 +191,11 @@ reboot
 Should your system bypass the internal drive and drop right back onto the installation media, **refrain from panicking.** There is zero need to wipe the slate clean. Re-stitch the directory hierarchy back together using this precise command sequence:
 
 ```bash
-# Re-mount underlying nodes (assumes /dev/sda mapping)
+## Re-mount underlying nodes (assumes /dev/sda mapping)
 mount /dev/sda3 /mnt/gentoo
 mount /dev/sda1 /mnt/gentoo/boot
 
-# Re-establish running infrastructure binds
+## Re-establish running infrastructure binds
 mount -t proc proc /mnt/gentoo/proc
 mount --rbind /sys /mnt/gentoo/sys
 mount --make-rslave /mnt/gentoo/sys
@@ -201,7 +204,7 @@ mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
 mount --make-slave /mnt/gentoo/run
 
-# Return to target chroot environment
+## Return to target chroot environment
 cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
 chroot /mnt/gentoo /bin/bash
 export PS1="(chroot) $PS1"
@@ -209,10 +212,10 @@ export PS1="(chroot) $PS1"
 
 From inside the active recovery chroot, enforce your specific kernel package build configurations and patch the GRUB setup:
 ```bash
-# Stabilize binary kernel hooks
+## Stabilize binary kernel hooks
 emerge --config "=sys-kernel/gentoo-kernel-bin-6.18.33_p1" 
 
-# Refresh target bootloader configuration
+## Refresh target bootloader configuration
 grub-install --target=x86_64-efi --efi-directory=/boot --no-nvram --removable
 grub-mkconfig -o /boot/grub/grub.cfg
 ```

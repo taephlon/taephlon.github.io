@@ -1,28 +1,40 @@
 // ── Markdown → HTML parser ──────────────────────────────────────
 function parseMarkdown(md) {
+  // Escape HTML entities first
   let html = md
-    // Escape HTML entities first
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-    // Code blocks (``` ... ```) — do before inline code
-    .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
-      `<pre><code class="language-${lang}">${code.trimEnd()}</code></pre>`)
+  // Extract code blocks (``` ... ```)
+  const codeBlocks = [];
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const placeholder = `__CODE_BLOCK_PLACEHOLDER_${codeBlocks.length}__`;
+    codeBlocks.push(`<pre><code class="language-${lang}">${code.trimEnd()}</code></pre>`);
+    return placeholder;
+  });
 
-    // Headings
+  // Extract inline code ( `...` )
+  const inlineCodes = [];
+  html = html.replace(/`([^`\n]+)`/g, (_, code) => {
+    const placeholder = `__INLINE_CODE_PLACEHOLDER_${inlineCodes.length}__`;
+    inlineCodes.push(`<code>${code}</code>`);
+    return placeholder;
+  });
+
+  // Headings
+  html = html
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
 
-  // Images — add this line
+    // Images
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">')
 
     // Bold & italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-
-    // Inline code
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
 
     // Blockquotes
     .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
@@ -45,14 +57,24 @@ function parseMarkdown(md) {
     // Horizontal rule
     .replace(/^---$/gm, '<hr>')
 
-    // Paragraphs — wrap lines that aren't already block elements
-    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre)(.+)$/gm, '<p>$1</p>')
+    // Paragraphs — wrap lines that aren't already block elements (ignoring code block placeholders)
+    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre|__CODE_BLOCK_PLACEHOLDER_\d+__)(.+)$/gm, '<p>$1</p>')
 
     // Clean up empty paragraphs
     .replace(/<p>\s*<\/p>/g, '')
 
     // Collapse multiple blank lines
     .replace(/\n{3,}/g, '\n\n');
+
+  // Restore inline codes
+  inlineCodes.forEach((codeHTML, idx) => {
+    html = html.replace(`__INLINE_CODE_PLACEHOLDER_${idx}__`, codeHTML);
+  });
+
+  // Restore code blocks
+  codeBlocks.forEach((codeHTML, idx) => {
+    html = html.replace(`__CODE_BLOCK_PLACEHOLDER_${idx}__`, codeHTML);
+  });
 
   return html;
 }
