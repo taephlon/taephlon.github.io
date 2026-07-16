@@ -14,12 +14,14 @@ Should a step go awry outside the chroot or if you lose your bearings, hit `CTRL
 Establish standard network visibility. Opt for interactive configuration or spin up the SSH daemon if you prefer to orchestrate the installation remotely from another workstation. Setting a root credential is mandatory for SSH access.
 
 ```bash
-# Choice A: Interactive console wizard
+
+# 1. Set-up your network connection
 net-setup
 
-# Choice B: Remote daemon spin-up
+# 2. Set up the sshd if u want to use ssh connection
 passwd root
 rc-service sshd start
+
 ```
 
 ### Partitioning Layout

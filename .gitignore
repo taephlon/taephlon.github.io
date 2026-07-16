@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# pnpm logs and cache
+pnpm-debug.log*
+.pnpm-store/
+
+# Vite build/cache files (if used in future)
+dist/
+.vite/
