@@ -5,7 +5,11 @@
     "date": "2025-05-10",
     "description": "A deep dive into the tools, techniques, and mindset needed to debug the Linux kernel effectively — from printk to KGDB.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": ["linux", "debugging", "systems"],
+    "tags": [
+      "linux",
+      "debugging",
+      "systems"
+    ],
     "popular": true,
     "favorite": false,
     "readTime": "8 min read",
@@ -17,7 +21,11 @@
     "date": "2025-02-08",
     "description": "HTTP is request-response. WebSockets are persistent. Here's how they actually work at the protocol level.",
     "thumbnail": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80",
-    "tags": ["networking", "web", "programming"],
+    "tags": [
+      "networking",
+      "web",
+      "programming"
+    ],
     "popular": false,
     "favorite": false,
     "readTime": "10 min read",
@@ -29,11 +37,31 @@
     "date": "2025-01-19",
     "description": "I used to avoid the command line at all costs. Now it's the first thing I open every morning. Here's what changed.",
     "thumbnail": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&q=80",
-    "tags": ["linux", "productivity", "cli"],
+    "tags": [
+      "linux",
+      "productivity",
+      "cli"
+    ],
     "popular": true,
     "favorite": false,
     "readTime": "7 min read",
     "file": "posts/content/how-i-learned-to-love-the-terminal.md"
+  },
+  {
+    "slug": "gentoo-installation-guide-2026",
+    "title": "Gentoo Installation Guide 2026",
+    "date": "2026-07-16",
+    "description": "A streamlined, easy and fast guide for spinning up a working Gentoo CLI base environment utilizing a pre-compiled binary kernel.",
+    "thumbnail": "/assets/pictures/gentoo.png",
+    "tags": [
+      "gentoo",
+      "linux",
+      "cli"
+    ],
+    "popular": false,
+    "favorite": true,
+    "readTime": "8 min read",
+    "file": "posts/content/gentoo-installation-guide-2026.md"
   },
   {
     "slug": "a-field-guide-to-zsh-plugins",
@@ -41,7 +69,11 @@
     "date": "2024-12-30",
     "description": "Not all Zsh plugins are worth installing. Here are the ones I actually use daily and why they earn their place.",
     "thumbnail": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80",
-    "tags": ["cli", "linux", "productivity"],
+    "tags": [
+      "cli",
+      "linux",
+      "productivity"
+    ],
     "popular": false,
     "favorite": true,
     "readTime": "6 min read",
