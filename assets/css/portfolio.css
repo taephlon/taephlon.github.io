@@ -535,7 +535,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 16px 24px;
   text-decoration: none;
   color: inherit;
   transition: all var(--transition);
@@ -544,6 +544,37 @@
   border-color: rgba(124,106,247,0.35);
   transform: translateX(4px);
   background: var(--surface-hover);
+}
+
+.pf-cert-badge {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+  transition: transform var(--transition);
+}
+.pf-cert-card:hover .pf-cert-badge {
+  transform: scale(1.08);
+}
+
+.pf-cert-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(124, 106, 247, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(124, 106, 247, 0.25);
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+.pf-cert-card:hover .pf-cert-icon-wrapper {
+  transform: scale(1.08);
+  background: rgba(124, 106, 247, 0.18);
+  border-color: rgba(124, 106, 247, 0.4);
 }
 
 .pf-cert-year {
