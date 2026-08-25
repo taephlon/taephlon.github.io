@@ -4,14 +4,34 @@
 // Usage: node scripts/new-post.js
 // ─────────────────────────────────────────────────────────────────
 
-const fs   = require('fs');
-const path = require('path');
-const rl   = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+import fs from 'node:fs';
+import path from 'node:path';
+import readline from 'node:readline';
+import { fileURLToPath } from 'node:url';
 
-const POSTS_FILE    = path.join(__dirname, '../posts/posts.json');
-const CONTENT_DIR   = path.join(__dirname, '../posts/content');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const ask = (q) => new Promise(res => rl.question(q, res));
+const POSTS_FILE  = path.join(__dirname, '../posts/posts.json');
+const CONTENT_DIR = path.join(__dirname, '../posts/content');
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+// Everything is read through this one iterator. Mixing `rl.question` with
+// `for await (const line of rl)` drops the first line of the iteration.
+const input = rl[Symbol.asyncIterator]();
+
+async function nextLine() {
+  const { value, done } = await input.next();
+  if (done) return null;
+  return value;
+}
+
+async function ask(question) {
+  process.stdout.write(question);
+  const answer = await nextLine();
+  if (answer === null) throw new Error(`Input ended while waiting for an answer to "${question.trim()}"`);
+  return answer;
+}
 
 function slugify(str) {
   return str.toLowerCase().trim()
@@ -25,6 +45,44 @@ function estimateReadTime(content) {
   return `${minutes} min read`;
 }
 
+function readPosts() {
+  let raw;
+  try {
+    raw = fs.readFileSync(POSTS_FILE, 'utf8');
+  } catch (err) {
+    throw new Error(`Could not read ${POSTS_FILE}: ${err.message}`, { cause: err });
+  }
+
+  let posts;
+  try {
+    posts = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`${POSTS_FILE} is not valid JSON, fix it before adding a post: ${err.message}`, { cause: err });
+  }
+
+  if (!Array.isArray(posts)) {
+    throw new Error(`${POSTS_FILE} must contain an array of posts but contained ${typeof posts}`);
+  }
+  return posts;
+}
+
+function writeFileChecked(file, contents, description) {
+  try {
+    fs.writeFileSync(file, contents);
+  } catch (err) {
+    throw new Error(`Could not write ${description} (${file}): ${err.message}`, { cause: err });
+  }
+}
+
+async function readMarkdownFromStdin() {
+  const lines = [];
+  for (let line = await nextLine(); line !== null; line = await nextLine()) {
+    if (line.trim() === 'END') break;
+    lines.push(line);
+  }
+  return lines.join('\n');
+}
+
 async function main() {
   console.log('\n✦ New Blog Post\n' + '─'.repeat(40));
 
@@ -35,24 +93,36 @@ async function main() {
   const popular     = (await ask('Mark as popular? (y/n): ')).toLowerCase() === 'y';
   const favorite    = (await ask('Mark as favorite? (y/n): ')).toLowerCase() === 'y';
 
+  const slug = slugify(title);
+  if (!slug) {
+    throw new Error('A title containing at least one letter or digit is required');
+  }
+
+  // Validate posts.json up front so a failure here cannot leave an orphaned
+  // markdown file behind.
+  const posts = readPosts();
+  if (posts.some(p => p.slug === slug)) {
+    throw new Error(`A post with the slug "${slug}" already exists in ${POSTS_FILE}`);
+  }
+
+  const mdPath = path.join(CONTENT_DIR, `${slug}.md`);
+  if (fs.existsSync(mdPath)) {
+    throw new Error(`${mdPath} already exists; refusing to overwrite it`);
+  }
+
   console.log('\nPaste your Markdown content.');
   console.log('Type END on a new line when done:\n');
+  const markdown = await readMarkdownFromStdin();
 
-  let lines = [];
-  for await (const line of rl) {
-    if (line.trim() === 'END') break;
-    lines.push(line);
+  if (!fs.existsSync(CONTENT_DIR)) {
+    try {
+      fs.mkdirSync(CONTENT_DIR, { recursive: true });
+    } catch (err) {
+      throw new Error(`Could not create ${CONTENT_DIR}: ${err.message}`, { cause: err });
+    }
   }
-  const markdown = lines.join('\n');
-  const slug = slugify(title);
+  writeFileChecked(mdPath, markdown, 'the post markdown');
 
-  // Write .md file
-  if (!fs.existsSync(CONTENT_DIR)) fs.mkdirSync(CONTENT_DIR, { recursive: true });
-  const mdPath = path.join(CONTENT_DIR, `${slug}.md`);
-  fs.writeFileSync(mdPath, markdown);
-
-  // Update posts.json
-  const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
   posts.unshift({
     slug,
     title:       title.trim(),
@@ -65,13 +135,27 @@ async function main() {
     readTime:    estimateReadTime(markdown),
     file:        `posts/content/${slug}.md`
   });
-  fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
+
+  try {
+    writeFileChecked(POSTS_FILE, JSON.stringify(posts, null, 2), 'the posts index');
+  } catch (err) {
+    // The markdown file is already on disk; say so instead of leaving the user
+    // with a half-applied change they do not know about.
+    console.error(`⚠ ${mdPath} was written but could not be registered in ${POSTS_FILE}.`);
+    throw err;
+  }
 
   console.log(`\n✅ Post created!`);
   console.log(`   Markdown: posts/content/${slug}.md`);
   console.log(`   URL:      post.html?slug=${slug}\n`);
-  rl.close();
 }
 
-async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
-main().catch(e => { console.error(e.message); process.exit(1); });
+try {
+  await main();
+} catch (err) {
+  console.error(`✗ ${err.message}`);
+  if (err.cause) console.error(err.cause);
+  process.exitCode = 1;
+} finally {
+  rl.close();
+}

@@ -2,31 +2,44 @@
 const POSTS_URL = './posts/posts.json';
 let allPosts = [];
 let activeTag = 'all';
+const GRID_IDS = ['recent-grid', 'popular-grid', 'favorites-grid'];
+
+// Every section is fed by the same posts.json, so a failure has to clear all of
+// them — otherwise the untouched sections keep showing their loading state.
+function showGridsFailure(message) {
+  GRID_IDS.forEach(id => showFailure(id, message));
+}
 
 // ── Fetch posts ────────────────────────────────────────────────
 async function fetchPosts() {
   try {
-    const res = await fetch(POSTS_URL);
-    if (!res.ok) throw new Error('Failed to load posts');
-    allPosts = await res.json();
+    allPosts = await loadPosts(POSTS_URL);
+  } catch (err) {
+    reportError('blog: loading posts', err);
+    showGridsFailure(`Could not load posts: ${describeError(err)}`);
+    return;
+  }
+
+  // Rendering failures are bugs rather than loading failures, so they get
+  // their own message instead of being reported as a failed fetch.
+  try {
     init();
-  } catch (e) {
-    console.error(e);
-    document.getElementById('recent-grid').innerHTML =
-      `<div class="empty"><p>⚠ Could not load posts. Make sure you're running on a server.</p></div>`;
+  } catch (err) {
+    reportError('blog: rendering posts', err);
+    showGridsFailure(`Could not display posts: ${describeError(err)}`);
   }
 }
 
 // ── Collect all tags ───────────────────────────────────────────
 function getAllTags() {
   const set = new Set();
-  allPosts.forEach(p => p.tags.forEach(t => set.add(t)));
+  allPosts.forEach(p => postTags(p).forEach(t => set.add(t)));
   return ['all', ...Array.from(set).sort()];
 }
 
 // ── Render tag filter ──────────────────────────────────────────
 function renderTags() {
-  const container = document.getElementById('tag-list');
+  const container = requireEl('tag-list');
   const tags = getAllTags();
   container.innerHTML = tags.map(tag => `
     <button class="tag ${tag === activeTag ? 'active' : ''}" data-tag="${tag}">
@@ -36,9 +49,16 @@ function renderTags() {
 
   container.querySelectorAll('.tag').forEach(btn => {
     btn.addEventListener('click', () => {
+      const previousTag = activeTag;
       activeTag = btn.dataset.tag;
-      renderTags();
-      renderSections();
+      try {
+        renderTags();
+        renderSections();
+      } catch (err) {
+        activeTag = previousTag;
+        reportError('blog: filtering by tag', err);
+        showGridsFailure(`Could not filter posts: ${describeError(err)}`);
+      }
     });
   });
 }
@@ -46,7 +66,7 @@ function renderTags() {
 // ── Filter posts ───────────────────────────────────────────────
 function filterPosts(posts) {
   if (activeTag === 'all') return posts;
-  return posts.filter(p => p.tags.includes(activeTag));
+  return posts.filter(p => postTags(p).includes(activeTag));
 }
 
 // ── Card HTML ──────────────────────────────────────────────────
@@ -62,7 +82,7 @@ function cardHTML(post, delay = 0) {
       </div>
       <div class="card-body">
         <div class="card-tags">
-          ${post.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+          ${postTags(post).map(t => `<span class="card-tag">${t}</span>`).join('')}
         </div>
         <h3 class="card-title">${post.title}</h3>
         <div class="card-meta">
@@ -81,7 +101,7 @@ function cardHTML(post, delay = 0) {
 
 // ── Render grid ────────────────────────────────────────────────
 function renderGrid(containerId, posts, emptyMsg = 'No posts found.') {
-  const el = document.getElementById(containerId);
+  const el = requireEl(containerId);
   const filtered = filterPosts(posts);
   if (!filtered.length) {
     el.innerHTML = `<div class="empty"><p>${emptyMsg}</p></div>`;
@@ -107,4 +127,4 @@ function init() {
   renderSections();
 }
 
-fetchPosts();
+fetchPosts().catch(err => reportError('blog: unexpected failure', err));
