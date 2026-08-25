@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { JSDOM } from 'jsdom';
 import { buildSitemapXML } from '../scripts/generate-sitemap.js';
 
 describe('buildSitemapXML', () => {
@@ -13,10 +12,7 @@ describe('buildSitemapXML', () => {
     expect(xml).toContain('https://taephlon.github.io/post.html?slug=first-post');
     expect(xml).toContain('<lastmod>2025-04-03</lastmod>');
     expect(xml).toContain('<lastmod>2024-12-31</lastmod>');
-    const parsed = new JSDOM().window.DOMParser
-      ? new (new JSDOM().window.DOMParser)().parseFromString(xml, 'application/xml')
-      : null;
-    expect(parsed).not.toBeNull();
+    const parsed = new DOMParser().parseFromString(xml, 'application/xml');
     expect(parsed.querySelector('parsererror')).toBeNull();
     expect(parsed.getElementsByTagName('url')).toHaveLength(4);
   });

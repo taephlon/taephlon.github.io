@@ -81,8 +81,10 @@ describe('post reader', () => {
   it('redirects when the URL has no slug', async () => {
     history.replaceState({}, '', '/post.html');
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetch = vi.fn();
+    global.fetch = fetch;
     await loadPost();
-    expect(window.location.href).toContain('/post.html');
+    expect(fetch).not.toHaveBeenCalled();
     error.mockRestore();
   });
 

@@ -35,43 +35,43 @@ export function initTerminal() {
   let outputHTML = '';
 
   function nextChar() {
-  if (lineIdx >= lines.length) {
-    // add blinking cursor at end
-    outputHTML += '<span class="t-cursor"></span>';
-    terminalEl.innerHTML = outputHTML;
-    return;
-  }
+    if (lineIdx >= lines.length) {
+      // add blinking cursor at end
+      outputHTML += '<span class="t-cursor"></span>';
+      terminalEl.innerHTML = outputHTML;
+      return;
+    }
 
-  const line = lines[lineIdx];
+    const line = lines[lineIdx];
 
-  if (charIdx === 0) {
-    // Start new line
-    if (line.type === 'prompt') {
-      outputHTML += `<span class="t-prompt">❯ </span><span class="t-out" style="color:var(--muted)">${line.text} </span>`;
+    if (charIdx === 0) {
+      // Start new line
+      if (line.type === 'prompt') {
+        outputHTML += `<span class="t-prompt">❯ </span><span class="t-out" style="color:var(--muted)">${line.text} </span>`;
+        lineIdx++;
+        charIdx = 0;
+        terminalEl.innerHTML = outputHTML;
+        setTimeout(nextChar, 60);
+        return;
+      }
+    }
+
+    const text = line.type === 'prompt' ? line.text : line.text;
+    const colorClass = line.type === 'cmd' ? 't-cmd' : line.type === 'accent' ? 't-accent' : 't-out';
+
+    if (charIdx < text.length) {
+      if (charIdx === 0) outputHTML += `<span class="${colorClass}">`;
+      outputHTML += text[charIdx];
+      charIdx++;
+      terminalEl.innerHTML = outputHTML + '</span><span class="t-cursor"></span>';
+      setTimeout(nextChar, line.type === 'cmd' ? 55 : 18);
+    } else {
+      outputHTML += '</span>\n';
       lineIdx++;
       charIdx = 0;
       terminalEl.innerHTML = outputHTML;
-      setTimeout(nextChar, 60);
-      return;
+      setTimeout(nextChar, lineIdx % 2 === 0 ? 350 : 80);
     }
-  }
-
-  const text = line.type === 'prompt' ? line.text : line.text;
-  const colorClass = line.type === 'cmd' ? 't-cmd' : line.type === 'accent' ? 't-accent' : 't-out';
-
-  if (charIdx < text.length) {
-    if (charIdx === 0) outputHTML += `<span class="${colorClass}">`;
-    outputHTML += text[charIdx];
-    charIdx++;
-    terminalEl.innerHTML = outputHTML + '</span><span class="t-cursor"></span>';
-    setTimeout(nextChar, line.type === 'cmd' ? 55 : 18);
-  } else {
-    outputHTML += '</span>\n';
-    lineIdx++;
-    charIdx = 0;
-    terminalEl.innerHTML = outputHTML;
-    setTimeout(nextChar, lineIdx % 2 === 0 ? 350 : 80);
-  }
   }
   setTimeout(nextChar, 800);
 }
