@@ -16,7 +16,22 @@ const CONTENT_DIR = path.join(__dirname, '../posts/content');
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-const ask = (q) => new Promise(res => rl.question(q, res));
+// Everything is read through this one iterator. Mixing `rl.question` with
+// `for await (const line of rl)` drops the first line of the iteration.
+const input = rl[Symbol.asyncIterator]();
+
+async function nextLine() {
+  const { value, done } = await input.next();
+  if (done) return null;
+  return value;
+}
+
+async function ask(question) {
+  process.stdout.write(question);
+  const answer = await nextLine();
+  if (answer === null) throw new Error(`Input ended while waiting for an answer to "${question.trim()}"`);
+  return answer;
+}
 
 function slugify(str) {
   return str.toLowerCase().trim()
@@ -61,7 +76,7 @@ function writeFileChecked(file, contents, description) {
 
 async function readMarkdownFromStdin() {
   const lines = [];
-  for await (const line of rl) {
+  for (let line = await nextLine(); line !== null; line = await nextLine()) {
     if (line.trim() === 'END') break;
     lines.push(line);
   }
