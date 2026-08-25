@@ -28,8 +28,10 @@ function parseMarkdown(md) {
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
 
-    // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">')
+    // Images — & < > are already encoded above, so only quotes need escaping
+    // to keep these values inside their attributes.
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) =>
+      `<img src="${escapeQuotes(safeURL(src))}" alt="${escapeQuotes(alt)}" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">`)
 
     // Bold & italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
@@ -52,7 +54,8 @@ function parseMarkdown(md) {
     })
 
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, href) =>
+      `<a href="${escapeQuotes(safeURL(href, '#'))}" target="_blank" rel="noopener noreferrer">${text}</a>`)
 
     // Horizontal rule
     .replace(/^---$/gm, '<hr>')
@@ -101,6 +104,12 @@ async function loadPost() {
       return;
     }
 
+    // The markdown path comes from posts.json, but keep it confined to
+    // posts/content/ so a bad entry cannot pull in arbitrary paths.
+    if (!/^posts\/content\/[\w.-]+\.md$/.test(String(post.file || '')) || post.file.includes('..')) {
+      throw new Error('Invalid post content path');
+    }
+
     // Fetch the .md file
     const mdRes = await fetch('./' + post.file);
     if (!mdRes.ok) throw new Error('Could not load markdown file: ' + post.file);
@@ -113,8 +122,12 @@ async function loadPost() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById('post-body').innerHTML =
-      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
+    const body = document.getElementById('post-body');
+    body.textContent = '';
+    const msg = document.createElement('p');
+    msg.style.color = 'var(--muted)';
+    msg.textContent = '⚠ Failed to load post content.';
+    body.appendChild(msg);
   }
 }
 
@@ -123,13 +136,13 @@ function renderPost(post, contentHTML, allPosts) {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  document.getElementById('post-hero-img').src = post.thumbnail;
+  document.getElementById('post-hero-img').src = safeURL(post.thumbnail);
   document.getElementById('post-hero-img').alt = post.title;
   document.getElementById('post-title').textContent = post.title;
   document.getElementById('post-date').textContent = dateStr;
   document.getElementById('post-readtime').textContent = post.readTime;
   document.getElementById('post-tags').innerHTML =
-    post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
+    post.tags.map(t => `<span class="post-tag">${escapeHTML(t)}</span>`).join('');
   document.getElementById('post-body').innerHTML = contentHTML;
 
   // Related posts
@@ -140,19 +153,19 @@ function renderPost(post, contentHTML, allPosts) {
   const relatedEl = document.getElementById('related-grid');
   if (related.length) {
     relatedEl.innerHTML = related.map(p => `
-      <a class="card" href="post.html?slug=${p.slug}">
+      <a class="card" href="post.html?slug=${safeParam(p.slug)}">
         <div class="card-thumb-wrapper">
-          <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
+          <img class="card-thumb" src="${escapeHTML(safeURL(p.thumbnail))}" alt="${escapeHTML(p.title)}" loading="lazy">
         </div>
         <div class="card-body">
-          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
-          <h3 class="card-title">${p.title}</h3>
+          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${escapeHTML(t)}</span>`).join('')}</div>
+          <h3 class="card-title">${escapeHTML(p.title)}</h3>
           <div class="card-meta">
-            <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
+            <span>${escapeHTML(new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}))}</span>
             <span class="card-meta-dot"></span>
-            <span>${p.readTime}</span>
+            <span>${escapeHTML(p.readTime)}</span>
           </div>
-          <p class="card-desc">${p.description}</p>
+          <p class="card-desc">${escapeHTML(p.description)}</p>
         </div>
         <div class="card-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -178,27 +191,28 @@ function updateSEO(post) {
   setMeta('keywords', post.tags.join(', '));
   setMeta('og:title', post.title, true);
   setMeta('og:description', post.description, true);
-  setMeta('og:image', post.thumbnail, true);
+  setMeta('og:image', safeURL(post.thumbnail), true);
   setMeta('og:type', 'article', true);
   setMeta('twitter:card', 'summary_large_image');
   setMeta('twitter:title', post.title);
   setMeta('twitter:description', post.description);
-  setMeta('twitter:image', post.thumbnail);
+  setMeta('twitter:image', safeURL(post.thumbnail));
 
   let canonical = document.querySelector('link[rel="canonical"]');
   if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
-  canonical.href = window.location.href.split('?')[0] + `?slug=${post.slug}`;
+  canonical.href = window.location.href.split('?')[0] + `?slug=${safeParam(post.slug)}`;
 
   const ld = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title, description: post.description,
-    image: post.thumbnail, datePublished: post.date,
+    image: safeURL(post.thumbnail), datePublished: post.date,
     author: { '@type': 'Person', name: 'Your Name' },
     keywords: post.tags.join(', ')
   };
   let ldScript = document.getElementById('ld-json');
   if (!ldScript) { ldScript = document.createElement('script'); ldScript.id = 'ld-json'; ldScript.type = 'application/ld+json'; document.head.appendChild(ldScript); }
-  ldScript.textContent = JSON.stringify(ld);
+  // Escape < so post data can never terminate the script element.
+  ldScript.textContent = JSON.stringify(ld).replace(/</g, '\\u003c');
 }
 
 // ── Reading progress bar ─────────────────────────────────────────

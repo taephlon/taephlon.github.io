@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <title>Blog — Enver Avisena</title>
   <meta name="description" content="All blog posts — Linux, hardware, productivity, programming, and more.">
@@ -115,13 +118,8 @@
     <p>Hosted on <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a></p>
   </footer>
 
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-  <script>
-    // Mobile menu
-    document.getElementById('nav-hamburger').addEventListener('click', () => {
-      document.getElementById('mobile-menu').classList.toggle('open');
-    });
-  </script>
+  <script src="./assets/js/site.js"></script>
+  <script src="./assets/js/sanitize.js"></script>
   <script src="./assets/js/main.js"></script>
 </body>
 </html>
