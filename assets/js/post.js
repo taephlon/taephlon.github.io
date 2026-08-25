@@ -88,34 +88,59 @@ async function loadPost() {
 
   if (!slug) { window.location.href = './index.html'; return; }
 
+  let posts;
+  let post;
+  let contentHTML;
+
   try {
-    const res = await fetch(POSTS_URL);
-    const posts = await res.json();
-    const post = posts.find(p => p.slug === slug);
+    posts = await loadPosts(POSTS_URL);
+    post = posts.find(p => p.slug === slug);
 
     if (!post) {
-      document.body.innerHTML = `<div style="padding:80px;text-align:center;color:#8888a0;font-family:sans-serif">
-        <h2 style="font-size:2rem;color:#e8e8ed;margin-bottom:16px">Post not found</h2>
-        <a href="./index.html" style="color:#7c6af7">← Back to home</a>
-      </div>`;
+      showPostNotFound(slug);
       return;
     }
 
-    // Fetch the .md file
-    const mdRes = await fetch('./' + post.file);
-    if (!mdRes.ok) throw new Error('Could not load markdown file: ' + post.file);
-    const markdown = await mdRes.text();
-    const contentHTML = parseMarkdown(markdown);
+    if (typeof post.file !== 'string' || !post.file) {
+      throw new Error(`Post "${slug}" has no "file" field pointing at its markdown source`);
+    }
 
-    renderPost(post, contentHTML, posts);
-    updateSEO(post);
-    initScrollProgress();
-
-  } catch (e) {
-    console.error(e);
-    document.getElementById('post-body').innerHTML =
-      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
+    const markdown = await fetchText('./' + post.file);
+    contentHTML = parseMarkdown(markdown);
+  } catch (err) {
+    reportError('post: loading content', err);
+    showFailure('post-body', `Failed to load post content: ${describeError(err)}`);
+    return;
   }
+
+  // Rendering, SEO and the progress bar are independent: a failure in one must
+  // not silently skip the others.
+  try {
+    renderPost(post, contentHTML, posts);
+  } catch (err) {
+    reportError('post: rendering post', err);
+    showFailure('post-body', `Failed to display this post: ${describeError(err)}`);
+  }
+
+  try {
+    updateSEO(post);
+  } catch (err) {
+    reportError('post: updating SEO metadata', err);
+  }
+
+  try {
+    initScrollProgress();
+  } catch (err) {
+    reportError('post: initialising reading progress bar', err);
+  }
+}
+
+function showPostNotFound(slug) {
+  document.body.innerHTML = `<div style="padding:80px;text-align:center;color:#8888a0;font-family:sans-serif">
+    <h2 style="font-size:2rem;color:#e8e8ed;margin-bottom:16px">Post not found</h2>
+    <a href="./index.html" style="color:#7c6af7">← Back to home</a>
+  </div>`;
+  console.warn(`No post in ${POSTS_URL} matches slug "${slug}"`);
 }
 
 function renderPost(post, contentHTML, allPosts) {
@@ -123,21 +148,23 @@ function renderPost(post, contentHTML, allPosts) {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  document.getElementById('post-hero-img').src = post.thumbnail;
-  document.getElementById('post-hero-img').alt = post.title;
-  document.getElementById('post-title').textContent = post.title;
-  document.getElementById('post-date').textContent = dateStr;
-  document.getElementById('post-readtime').textContent = post.readTime;
-  document.getElementById('post-tags').innerHTML =
-    post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
-  document.getElementById('post-body').innerHTML = contentHTML;
+  const heroImg = requireEl('post-hero-img');
+  heroImg.src = post.thumbnail;
+  heroImg.alt = post.title;
+  requireEl('post-title').textContent = post.title;
+  requireEl('post-date').textContent = dateStr;
+  requireEl('post-readtime').textContent = post.readTime;
+  requireEl('post-tags').innerHTML =
+    postTags(post).map(t => `<span class="post-tag">${t}</span>`).join('');
+  requireEl('post-body').innerHTML = contentHTML;
 
   // Related posts
+  const tags = postTags(post);
   const related = allPosts
-    .filter(p => p.slug !== post.slug && p.tags.some(t => post.tags.includes(t)))
+    .filter(p => p.slug !== post.slug && postTags(p).some(t => tags.includes(t)))
     .slice(0, 3);
 
-  const relatedEl = document.getElementById('related-grid');
+  const relatedEl = requireEl('related-grid');
   if (related.length) {
     relatedEl.innerHTML = related.map(p => `
       <a class="card" href="post.html?slug=${p.slug}">
@@ -145,7 +172,7 @@ function renderPost(post, contentHTML, allPosts) {
           <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
         </div>
         <div class="card-body">
-          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
+          <div class="card-tags">${postTags(p).map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
           <h3 class="card-title">${p.title}</h3>
           <div class="card-meta">
             <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
@@ -175,7 +202,7 @@ function updateSEO(post) {
     el.setAttribute('content', content);
   };
   setMeta('description', post.description);
-  setMeta('keywords', post.tags.join(', '));
+  setMeta('keywords', postTags(post).join(', '));
   setMeta('og:title', post.title, true);
   setMeta('og:description', post.description, true);
   setMeta('og:image', post.thumbnail, true);
@@ -194,7 +221,7 @@ function updateSEO(post) {
     headline: post.title, description: post.description,
     image: post.thumbnail, datePublished: post.date,
     author: { '@type': 'Person', name: 'Your Name' },
-    keywords: post.tags.join(', ')
+    keywords: postTags(post).join(', ')
   };
   let ldScript = document.getElementById('ld-json');
   if (!ldScript) { ldScript = document.createElement('script'); ldScript.id = 'ld-json'; ldScript.type = 'application/ld+json'; document.head.appendChild(ldScript); }
@@ -203,11 +230,11 @@ function updateSEO(post) {
 
 // ── Reading progress bar ─────────────────────────────────────────
 function initScrollProgress() {
-  const bar = document.getElementById('post-progress');
+  const bar = requireEl('post-progress');
   window.addEventListener('scroll', () => {
     const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
     bar.style.width = Math.min(pct, 100) + '%';
   }, { passive: true });
 }
 
-loadPost();
+loadPost().catch(err => reportError('post: unexpected failure', err));
