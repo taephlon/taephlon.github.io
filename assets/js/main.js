@@ -29,8 +29,8 @@ function renderTags() {
   const container = document.getElementById('tag-list');
   const tags = getAllTags();
   container.innerHTML = tags.map(tag => `
-    <button class="tag ${tag === activeTag ? 'active' : ''}" data-tag="${tag}">
-      ${tag === 'all' ? '✦ All' : tag}
+    <button class="tag ${tag === activeTag ? 'active' : ''}" data-tag="${escapeHTML(tag)}">
+      ${tag === 'all' ? '✦ All' : escapeHTML(tag)}
     </button>
   `).join('');
 
@@ -56,21 +56,21 @@ function cardHTML(post, delay = 0) {
   });
 
   return `
-    <a class="card" href="post.html?slug=${post.slug}" style="animation-delay:${delay}ms">
+    <a class="card" href="post.html?slug=${safeParam(post.slug)}" style="animation-delay:${Number(delay) || 0}ms">
       <div class="card-thumb-wrapper">
-        <img class="card-thumb" src="${post.thumbnail}" alt="${post.title}" loading="lazy">
+        <img class="card-thumb" src="${escapeHTML(safeURL(post.thumbnail))}" alt="${escapeHTML(post.title)}" loading="lazy">
       </div>
       <div class="card-body">
         <div class="card-tags">
-          ${post.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+          ${post.tags.map(t => `<span class="card-tag">${escapeHTML(t)}</span>`).join('')}
         </div>
-        <h3 class="card-title">${post.title}</h3>
+        <h3 class="card-title">${escapeHTML(post.title)}</h3>
         <div class="card-meta">
-          <span>${dateStr}</span>
+          <span>${escapeHTML(dateStr)}</span>
           <span class="card-meta-dot"></span>
-          <span>${post.readTime}</span>
+          <span>${escapeHTML(post.readTime)}</span>
         </div>
-        <p class="card-desc">${post.description}</p>
+        <p class="card-desc">${escapeHTML(post.description)}</p>
       </div>
       <div class="card-arrow">
         <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>

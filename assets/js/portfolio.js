@@ -1,15 +1,4 @@
-// ── Mobile menu ────────────────────────────────────────────────
-const hamburger = document.getElementById('nav-hamburger');
-const mobileMenu = document.getElementById('mobile-menu');
-
-hamburger.addEventListener('click', () => {
-  mobileMenu.classList.toggle('open');
-});
-
-// Close mobile menu on link click
-mobileMenu.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => mobileMenu.classList.remove('open'));
-});
+// Mobile menu lives in site.js (shared across pages).
 
 // ── Terminal typewriter ────────────────────────────────────────
 const terminalEl = document.getElementById('terminal-body');
