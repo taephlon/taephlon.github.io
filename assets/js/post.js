@@ -1,3 +1,5 @@
+import { fetchPosts, formatDate, tagsHTML, cardHTML, setHTML, initLayout, upsertHeadElement } from './shared.js';
+
 // ── Markdown → HTML parser ──────────────────────────────────────
 function parseMarkdown(md) {
   // Escape HTML entities first
@@ -80,8 +82,6 @@ function parseMarkdown(md) {
 }
 
 // ── Post Reader Engine ──────────────────────────────────────────
-const POSTS_URL = './posts/posts.json';
-
 async function loadPost() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
@@ -89,8 +89,7 @@ async function loadPost() {
   if (!slug) { window.location.href = './index.html'; return; }
 
   try {
-    const res = await fetch(POSTS_URL);
-    const posts = await res.json();
+    const posts = await fetchPosts();
     const post = posts.find(p => p.slug === slug);
 
     if (!post) {
@@ -113,56 +112,28 @@ async function loadPost() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById('post-body').innerHTML =
-      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
+    setHTML('post-body',
+      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`);
   }
 }
 
 function renderPost(post, contentHTML, allPosts) {
-  const dateStr = new Date(post.date).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-
   document.getElementById('post-hero-img').src = post.thumbnail;
   document.getElementById('post-hero-img').alt = post.title;
   document.getElementById('post-title').textContent = post.title;
-  document.getElementById('post-date').textContent = dateStr;
+  document.getElementById('post-date').textContent = formatDate(post.date, 'long');
   document.getElementById('post-readtime').textContent = post.readTime;
-  document.getElementById('post-tags').innerHTML =
-    post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
-  document.getElementById('post-body').innerHTML = contentHTML;
+  setHTML('post-tags', tagsHTML(post.tags, 'post-tag'));
+  setHTML('post-body', contentHTML);
 
   // Related posts
   const related = allPosts
     .filter(p => p.slug !== post.slug && p.tags.some(t => post.tags.includes(t)))
     .slice(0, 3);
 
-  const relatedEl = document.getElementById('related-grid');
-  if (related.length) {
-    relatedEl.innerHTML = related.map(p => `
-      <a class="card" href="post.html?slug=${p.slug}">
-        <div class="card-thumb-wrapper">
-          <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
-        </div>
-        <div class="card-body">
-          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
-          <h3 class="card-title">${p.title}</h3>
-          <div class="card-meta">
-            <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
-            <span class="card-meta-dot"></span>
-            <span>${p.readTime}</span>
-          </div>
-          <p class="card-desc">${p.description}</p>
-        </div>
-        <div class="card-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </a>`).join('');
-  } else {
-    relatedEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No related posts found.</p>';
-  }
+  setHTML('related-grid', related.length
+    ? related.map(p => cardHTML(p)).join('')
+    : '<p style="color:var(--muted);font-size:0.9rem">No related posts found.</p>');
 }
 
 // ── SEO ──────────────────────────────────────────────────────────
@@ -170,8 +141,7 @@ function updateSEO(post) {
   document.title = `${post.title} — My Blog`;
   const setMeta = (name, content, prop = false) => {
     const attr = prop ? 'property' : 'name';
-    let el = document.querySelector(`meta[${attr}="${name}"]`);
-    if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
+    const el = upsertHeadElement(`meta[${attr}="${name}"]`, 'meta', m => m.setAttribute(attr, name));
     el.setAttribute('content', content);
   };
   setMeta('description', post.description);
@@ -185,8 +155,7 @@ function updateSEO(post) {
   setMeta('twitter:description', post.description);
   setMeta('twitter:image', post.thumbnail);
 
-  let canonical = document.querySelector('link[rel="canonical"]');
-  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+  const canonical = upsertHeadElement('link[rel="canonical"]', 'link', l => { l.rel = 'canonical'; });
   canonical.href = window.location.href.split('?')[0] + `?slug=${post.slug}`;
 
   const ld = {
@@ -196,8 +165,10 @@ function updateSEO(post) {
     author: { '@type': 'Person', name: 'Your Name' },
     keywords: post.tags.join(', ')
   };
-  let ldScript = document.getElementById('ld-json');
-  if (!ldScript) { ldScript = document.createElement('script'); ldScript.id = 'ld-json'; ldScript.type = 'application/ld+json'; document.head.appendChild(ldScript); }
+  const ldScript = upsertHeadElement('#ld-json', 'script', s => {
+    s.id = 'ld-json';
+    s.type = 'application/ld+json';
+  });
   ldScript.textContent = JSON.stringify(ld);
 }
 
@@ -210,4 +181,5 @@ function initScrollProgress() {
   }, { passive: true });
 }
 
+initLayout();
 loadPost();

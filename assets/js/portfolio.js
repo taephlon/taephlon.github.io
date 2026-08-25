@@ -1,15 +1,6 @@
-// ── Mobile menu ────────────────────────────────────────────────
-const hamburger = document.getElementById('nav-hamburger');
-const mobileMenu = document.getElementById('mobile-menu');
+import { initLayout, observeOnce } from './shared.js';
 
-hamburger.addEventListener('click', () => {
-  mobileMenu.classList.toggle('open');
-});
-
-// Close mobile menu on link click
-mobileMenu.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => mobileMenu.classList.remove('open'));
-});
+initLayout();
 
 // ── Terminal typewriter ────────────────────────────────────────
 const terminalEl = document.getElementById('terminal-body');
@@ -104,29 +95,11 @@ const revealEls = document.querySelectorAll(
 
 revealEls.forEach(el => el.classList.add('pf-reveal'));
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), i * 60);
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12 });
+observeOnce(revealEls, (el, i) => {
+  setTimeout(() => el.classList.add('visible'), i * 60);
+}, 0.12);
 
-revealEls.forEach(el => observer.observe(el));
-
-// Counter observer
-const counterEls = document.querySelectorAll('.pf-stat-num');
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      animateCounter(entry.target);
-      counterObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.5 });
-
-counterEls.forEach(el => counterObserver.observe(el));
+observeOnce(document.querySelectorAll('.pf-stat-num'), animateCounter, 0.5);
 
 // ── Active nav link on scroll ──────────────────────────────────
 const sections = document.querySelectorAll('section[id], div[id="blog"]');

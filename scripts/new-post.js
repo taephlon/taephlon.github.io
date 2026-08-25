@@ -4,21 +4,14 @@
 // Usage: node scripts/new-post.js
 // ─────────────────────────────────────────────────────────────────
 
-const fs   = require('fs');
-const path = require('path');
-const rl   = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+import fs from 'node:fs';
+import path from 'node:path';
+import readline from 'node:readline';
+import { CONTENT_DIR, readPosts, writePosts, slugify, toISODate } from './lib/posts.js';
 
-const POSTS_FILE    = path.join(__dirname, '../posts/posts.json');
-const CONTENT_DIR   = path.join(__dirname, '../posts/content');
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 const ask = (q) => new Promise(res => rl.question(q, res));
-
-function slugify(str) {
-  return str.toLowerCase().trim()
-    .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
-}
-
-function today() { return new Date().toISOString().split('T')[0]; }
 
 function estimateReadTime(content) {
   const minutes = Math.max(1, Math.round(content.split(/\s+/).length / 200));
@@ -38,7 +31,7 @@ async function main() {
   console.log('\nPaste your Markdown content.');
   console.log('Type END on a new line when done:\n');
 
-  let lines = [];
+  const lines = [];
   for await (const line of rl) {
     if (line.trim() === 'END') break;
     lines.push(line);
@@ -48,15 +41,14 @@ async function main() {
 
   // Write .md file
   if (!fs.existsSync(CONTENT_DIR)) fs.mkdirSync(CONTENT_DIR, { recursive: true });
-  const mdPath = path.join(CONTENT_DIR, `${slug}.md`);
-  fs.writeFileSync(mdPath, markdown);
+  fs.writeFileSync(path.join(CONTENT_DIR, `${slug}.md`), markdown);
 
   // Update posts.json
-  const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
+  const posts = readPosts();
   posts.unshift({
     slug,
     title:       title.trim(),
-    date:        today(),
+    date:        toISODate(),
     description: description.trim(),
     thumbnail:   thumbnail.trim() || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80',
     tags:        tagsRaw.split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
@@ -65,7 +57,7 @@ async function main() {
     readTime:    estimateReadTime(markdown),
     file:        `posts/content/${slug}.md`
   });
-  fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
+  writePosts(posts);
 
   console.log(`\n✅ Post created!`);
   console.log(`   Markdown: posts/content/${slug}.md`);
@@ -73,5 +65,4 @@ async function main() {
   rl.close();
 }
 
-async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
 main().catch(e => { console.error(e.message); process.exit(1); });
