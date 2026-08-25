@@ -1,5 +1,19 @@
+const AUTHOR_NAME = 'Enver Avisena';
+
+function sanitizeUrl(url) {
+  const trimmedUrl = url.trim();
+  const allowedScheme = /^(?:https?:|mailto:)/i.test(trimmedUrl);
+  const relativeUrl = /^(?:\/|\.\/|#)/.test(trimmedUrl);
+  const noScheme = !/^[a-z][\w+.-]*:/i.test(trimmedUrl);
+  const safeUrl = allowedScheme || relativeUrl || noScheme ? trimmedUrl : '#';
+
+  return safeUrl.replace(/["']/g, character => character === '"' ? '&quot;' : '&#39;');
+}
+
 // ── Markdown → HTML parser ──────────────────────────────────────
 function parseMarkdown(md) {
+  md = md.replace(/\r\n?/g, '\n');
+
   // Escape HTML entities first
   let html = md
     .replace(/&/g, '&amp;')
@@ -9,15 +23,17 @@ function parseMarkdown(md) {
   // Extract code blocks (``` ... ```)
   const codeBlocks = [];
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-    const placeholder = `__CODE_BLOCK_PLACEHOLDER_${codeBlocks.length}__`;
-    codeBlocks.push(`<pre><code class="language-${lang}">${code.trimEnd()}</code></pre>`);
+    const placeholder = `\u0000C${codeBlocks.length}\u0000`;
+    const classAttribute = lang ? ` class="language-${lang}"` : '';
+    const codeContent = code.replace(/^\n+/, '').replace(/\s+$/, '');
+    codeBlocks.push(`<pre><code${classAttribute}>${codeContent}</code></pre>`);
     return placeholder;
   });
 
   // Extract inline code ( `...` )
   const inlineCodes = [];
   html = html.replace(/`([^`\n]+)`/g, (_, code) => {
-    const placeholder = `__INLINE_CODE_PLACEHOLDER_${inlineCodes.length}__`;
+    const placeholder = `\u0000I${inlineCodes.length}\u0000`;
     inlineCodes.push(`<code>${code}</code>`);
     return placeholder;
   });
@@ -29,7 +45,8 @@ function parseMarkdown(md) {
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
 
     // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) =>
+      `<img src="${sanitizeUrl(url)}" alt="${alt}" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">`)
 
     // Bold & italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
@@ -52,13 +69,14 @@ function parseMarkdown(md) {
     })
 
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) =>
+      `<a href="${sanitizeUrl(url)}" target="_blank" rel="noopener">${text}</a>`)
 
     // Horizontal rule
     .replace(/^---$/gm, '<hr>')
 
-    // Paragraphs — wrap lines that aren't already block elements (ignoring code block placeholders)
-    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre|__CODE_BLOCK_PLACEHOLDER_\d+__)(.+)$/gm, '<p>$1</p>')
+    // Paragraphs — wrap lines that aren't already block elements (ignoring code block sentinels)
+    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre|\u0000C\d+\u0000)(.+)$/gm, '<p>$1</p>')
 
     // Clean up empty paragraphs
     .replace(/<p>\s*<\/p>/g, '')
@@ -68,12 +86,12 @@ function parseMarkdown(md) {
 
   // Restore inline codes
   inlineCodes.forEach((codeHTML, idx) => {
-    html = html.replace(`__INLINE_CODE_PLACEHOLDER_${idx}__`, codeHTML);
+    html = html.replace(`\u0000I${idx}\u0000`, () => codeHTML);
   });
 
   // Restore code blocks
   codeBlocks.forEach((codeHTML, idx) => {
-    html = html.replace(`__CODE_BLOCK_PLACEHOLDER_${idx}__`, codeHTML);
+    html = html.replace(`\u0000C${idx}\u0000`, () => codeHTML);
   });
 
   return html;
@@ -128,6 +146,8 @@ function renderPost(post, contentHTML, allPosts) {
   document.getElementById('post-title').textContent = post.title;
   document.getElementById('post-date').textContent = dateStr;
   document.getElementById('post-readtime').textContent = post.readTime;
+  document.querySelector('.author-name').textContent = AUTHOR_NAME;
+  document.querySelector('.author-avatar').textContent = AUTHOR_NAME.charAt(0);
   document.getElementById('post-tags').innerHTML =
     post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
   document.getElementById('post-body').innerHTML = contentHTML;
@@ -167,7 +187,7 @@ function renderPost(post, contentHTML, allPosts) {
 
 // ── SEO ──────────────────────────────────────────────────────────
 function updateSEO(post) {
-  document.title = `${post.title} — My Blog`;
+  document.title = `${post.title} — Enver Avisena`;
   const setMeta = (name, content, prop = false) => {
     const attr = prop ? 'property' : 'name';
     let el = document.querySelector(`meta[${attr}="${name}"]`);
@@ -193,7 +213,7 @@ function updateSEO(post) {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title, description: post.description,
     image: post.thumbnail, datePublished: post.date,
-    author: { '@type': 'Person', name: 'Your Name' },
+    author: { '@type': 'Person', name: AUTHOR_NAME },
     keywords: post.tags.join(', ')
   };
   let ldScript = document.getElementById('ld-json');

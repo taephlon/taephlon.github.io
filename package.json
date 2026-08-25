@@ -2,13 +2,8 @@
   "name": "taephlon-blog",
   "version": "1.0.0",
   "description": "Minimal, fast personal blog built with plain HTML, CSS, and vanilla JavaScript.",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^6.0.7"
+    "new-post": "node scripts/new-post.js",
+    "sitemap": "node scripts/generate-sitemap.js"
   }
 }

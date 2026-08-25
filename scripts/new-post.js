@@ -73,5 +73,4 @@ async function main() {
   rl.close();
 }
 
-async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
 main().catch(e => { console.error(e.message); process.exit(1); });
