@@ -4,28 +4,30 @@
 // Usage: node scripts/new-post.js
 // ─────────────────────────────────────────────────────────────────
 
-const fs   = require('fs');
-const path = require('path');
-const rl   = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+import fs from 'node:fs';
+import path from 'node:path';
+import readline from 'node:readline';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_FILE    = path.join(__dirname, '../posts/posts.json');
 const CONTENT_DIR   = path.join(__dirname, '../posts/content');
 
-const ask = (q) => new Promise(res => rl.question(q, res));
-
-function slugify(str) {
+export function slugify(str) {
   return str.toLowerCase().trim()
     .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function today() { return new Date().toISOString().split('T')[0]; }
+export function today() { return new Date().toISOString().split('T')[0]; }
 
-function estimateReadTime(content) {
+export function estimateReadTime(content) {
   const minutes = Math.max(1, Math.round(content.split(/\s+/).length / 200));
   return `${minutes} min read`;
 }
 
-async function main() {
+export async function main() {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q) => new Promise(res => rl.question(q, res));
   console.log('\n✦ New Blog Post\n' + '─'.repeat(40));
 
   const title       = await ask('Title: ');
@@ -73,5 +75,6 @@ async function main() {
   rl.close();
 }
 
-async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
-main().catch(e => { console.error(e.message); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(e => { console.error(e.message); process.exit(1); });
+}

@@ -4,7 +4,7 @@ let allPosts = [];
 let activeTag = 'all';
 
 // ── Fetch posts ────────────────────────────────────────────────
-async function fetchPosts() {
+export async function fetchPosts() {
   try {
     const res = await fetch(POSTS_URL);
     if (!res.ok) throw new Error('Failed to load posts');
@@ -18,16 +18,16 @@ async function fetchPosts() {
 }
 
 // ── Collect all tags ───────────────────────────────────────────
-function getAllTags() {
+export function getAllTags(posts = allPosts) {
   const set = new Set();
-  allPosts.forEach(p => p.tags.forEach(t => set.add(t)));
+  posts.forEach(p => p.tags.forEach(t => set.add(t)));
   return ['all', ...Array.from(set).sort()];
 }
 
 // ── Render tag filter ──────────────────────────────────────────
-function renderTags() {
+export function renderTags(posts = allPosts) {
   const container = document.getElementById('tag-list');
-  const tags = getAllTags();
+  const tags = getAllTags(posts);
   container.innerHTML = tags.map(tag => `
     <button class="tag ${tag === activeTag ? 'active' : ''}" data-tag="${tag}">
       ${tag === 'all' ? '✦ All' : tag}
@@ -37,20 +37,20 @@ function renderTags() {
   container.querySelectorAll('.tag').forEach(btn => {
     btn.addEventListener('click', () => {
       activeTag = btn.dataset.tag;
-      renderTags();
-      renderSections();
+      renderTags(posts);
+      renderSections(posts);
     });
   });
 }
 
 // ── Filter posts ───────────────────────────────────────────────
-function filterPosts(posts) {
-  if (activeTag === 'all') return posts;
-  return posts.filter(p => p.tags.includes(activeTag));
+export function filterPosts(posts, tag = activeTag) {
+  if (tag === 'all') return posts;
+  return posts.filter(p => p.tags.includes(tag));
 }
 
 // ── Card HTML ──────────────────────────────────────────────────
-function cardHTML(post, delay = 0) {
+export function cardHTML(post, delay = 0) {
   const dateStr = new Date(post.date).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric'
   });
@@ -80,9 +80,9 @@ function cardHTML(post, delay = 0) {
 }
 
 // ── Render grid ────────────────────────────────────────────────
-function renderGrid(containerId, posts, emptyMsg = 'No posts found.') {
+export function renderGrid(containerId, posts, emptyMsg = 'No posts found.', tag = activeTag) {
   const el = document.getElementById(containerId);
-  const filtered = filterPosts(posts);
+  const filtered = filterPosts(posts, tag);
   if (!filtered.length) {
     el.innerHTML = `<div class="empty"><p>${emptyMsg}</p></div>`;
     return;
@@ -91,10 +91,10 @@ function renderGrid(containerId, posts, emptyMsg = 'No posts found.') {
 }
 
 // ── Render all sections ────────────────────────────────────────
-function renderSections() {
-  const sorted = [...allPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const popular = allPosts.filter(p => p.popular);
-  const favorites = allPosts.filter(p => p.favorite);
+export function renderSections(posts = allPosts) {
+  const sorted = [...posts].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const popular = posts.filter(p => p.popular);
+  const favorites = posts.filter(p => p.favorite);
 
   renderGrid('recent-grid', sorted, 'No recent posts match this tag.');
   renderGrid('popular-grid', popular, 'No popular posts match this tag.');
@@ -102,9 +102,17 @@ function renderSections() {
 }
 
 // ── Init ───────────────────────────────────────────────────────
-function init() {
-  renderTags();
-  renderSections();
+export function init(posts = allPosts) {
+  renderTags(posts);
+  renderSections(posts);
 }
 
-fetchPosts();
+export function setActiveTag(tag) {
+  activeTag = tag;
+}
+
+export function getActiveTag() {
+  return activeTag;
+}
+
+if (document.getElementById('recent-grid')) fetchPosts();

@@ -9,3 +9,4 @@ pnpm-debug.log*
 # Vite build/cache files (if used in future)
 dist/
 .vite/
+coverage/

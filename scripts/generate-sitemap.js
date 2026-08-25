@@ -1,15 +1,14 @@
 #!/usr/bin/env node
-const fs   = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const BASE_URL   = 'https://taephlon.github.io';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_FILE = path.join(__dirname, '../posts/posts.json');
 const OUT_FILE   = path.join(__dirname, '../sitemap.xml');
 
-function generate() {
-  const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
-  const today = new Date().toISOString().split('T')[0];
-
+export function buildSitemapXML(posts, today) {
   const urls = [
     `  <url>
     <loc>${BASE_URL}/</loc>
@@ -31,13 +30,18 @@ function generate() {
   </url>`)
   ];
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.join('\n')}
 </urlset>`;
+}
 
+export function generate() {
+  const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
+  const today = new Date().toISOString().split('T')[0];
+  const xml = buildSitemapXML(posts, today);
   fs.writeFileSync(OUT_FILE, xml);
   console.log(`✅ sitemap.xml generated with ${posts.length + 2} URLs`);
 }
 
-generate();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) generate();

@@ -1,5 +1,5 @@
 // ── Markdown → HTML parser ──────────────────────────────────────
-function parseMarkdown(md) {
+export function parseMarkdown(md) {
   // Escape HTML entities first
   let html = md
     .replace(/&/g, '&amp;')
@@ -82,7 +82,7 @@ function parseMarkdown(md) {
 // ── Post Reader Engine ──────────────────────────────────────────
 const POSTS_URL = './posts/posts.json';
 
-async function loadPost() {
+export async function loadPost() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
 
@@ -118,7 +118,7 @@ async function loadPost() {
   }
 }
 
-function renderPost(post, contentHTML, allPosts) {
+export function renderPost(post, contentHTML, allPosts) {
   const dateStr = new Date(post.date).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
@@ -166,7 +166,7 @@ function renderPost(post, contentHTML, allPosts) {
 }
 
 // ── SEO ──────────────────────────────────────────────────────────
-function updateSEO(post) {
+export function updateSEO(post) {
   document.title = `${post.title} — My Blog`;
   const setMeta = (name, content, prop = false) => {
     const attr = prop ? 'property' : 'name';
@@ -202,7 +202,7 @@ function updateSEO(post) {
 }
 
 // ── Reading progress bar ─────────────────────────────────────────
-function initScrollProgress() {
+export function initScrollProgress() {
   const bar = document.getElementById('post-progress');
   window.addEventListener('scroll', () => {
     const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
@@ -210,4 +210,4 @@ function initScrollProgress() {
   }, { passive: true });
 }
 
-loadPost();
+if (document.getElementById('post-body')) loadPost();
