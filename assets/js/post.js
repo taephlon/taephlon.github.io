@@ -109,6 +109,9 @@ async function loadPost() {
     contentHTML = parseMarkdown(markdown);
   } catch (err) {
     reportError('post: loading content', err);
+    // The header is still showing its "Loading…" placeholder, so fill in
+    // whatever metadata did load instead of leaving the page looking stuck.
+    safeInit('post: header after failure', () => renderPostHeader(post));
     showFailure('post-body', `Failed to load post content: ${describeError(err)}`);
     return;
   }
@@ -143,7 +146,13 @@ function showPostNotFound(slug) {
   console.warn(`No post in ${POSTS_URL} matches slug "${slug}"`);
 }
 
-function renderPost(post, contentHTML, allPosts) {
+// `post` is undefined when posts.json itself could not be loaded.
+function renderPostHeader(post) {
+  if (!post) {
+    requireEl('post-title').textContent = 'Post unavailable';
+    return;
+  }
+
   const dateStr = new Date(post.date).toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
@@ -156,6 +165,10 @@ function renderPost(post, contentHTML, allPosts) {
   requireEl('post-readtime').textContent = post.readTime;
   requireEl('post-tags').innerHTML =
     postTags(post).map(t => `<span class="post-tag">${t}</span>`).join('');
+}
+
+function renderPost(post, contentHTML, allPosts) {
+  renderPostHeader(post);
   requireEl('post-body').innerHTML = contentHTML;
 
   // Related posts

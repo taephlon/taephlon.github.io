@@ -2,6 +2,13 @@
 const POSTS_URL = './posts/posts.json';
 let allPosts = [];
 let activeTag = 'all';
+const GRID_IDS = ['recent-grid', 'popular-grid', 'favorites-grid'];
+
+// Every section is fed by the same posts.json, so a failure has to clear all of
+// them — otherwise the untouched sections keep showing their loading state.
+function showGridsFailure(message) {
+  GRID_IDS.forEach(id => showFailure(id, message));
+}
 
 // ── Fetch posts ────────────────────────────────────────────────
 async function fetchPosts() {
@@ -9,7 +16,7 @@ async function fetchPosts() {
     allPosts = await loadPosts(POSTS_URL);
   } catch (err) {
     reportError('blog: loading posts', err);
-    showFailure('recent-grid', `Could not load posts: ${describeError(err)}`);
+    showGridsFailure(`Could not load posts: ${describeError(err)}`);
     return;
   }
 
@@ -19,7 +26,7 @@ async function fetchPosts() {
     init();
   } catch (err) {
     reportError('blog: rendering posts', err);
-    showFailure('recent-grid', `Could not display posts: ${describeError(err)}`);
+    showGridsFailure(`Could not display posts: ${describeError(err)}`);
   }
 }
 
@@ -50,7 +57,7 @@ function renderTags() {
       } catch (err) {
         activeTag = previousTag;
         reportError('blog: filtering by tag', err);
-        showFailure('recent-grid', `Could not filter posts: ${describeError(err)}`);
+        showGridsFailure(`Could not filter posts: ${describeError(err)}`);
       }
     });
   });
