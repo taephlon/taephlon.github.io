@@ -1,5 +1,22 @@
 [
   {
+    "slug": "introducing-beehive-ebpf-lsm-linux-security",
+    "title": "Building a Kernel-Level Security Platform with eBPF LSM and Beehive",
+    "date": "2026-09-12",
+    "description": "An in-depth guide to eBPF LSM (Linux Security Modules) and how Beehive provides programmable, kernel-level process and network security enforcement.",
+    "thumbnail": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
+    "tags": [
+      "ebpf",
+      "linux",
+      "security",
+      "rust"
+    ],
+    "popular": true,
+    "favorite": true,
+    "readTime": "8 min read",
+    "file": "posts/content/introducing-beehive-ebpf-lsm-linux-security.md"
+  },
+  {
     "slug": "getting-started-with-linux-kernel-debugging",
     "title": "Getting Started with Linux Kernel Debugging",
     "date": "2025-05-10",

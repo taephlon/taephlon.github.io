@@ -4,9 +4,15 @@
 // Usage: node scripts/new-post.js
 // ─────────────────────────────────────────────────────────────────
 
-const fs   = require('fs');
-const path = require('path');
-const rl   = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 const POSTS_FILE    = path.join(__dirname, '../posts/posts.json');
 const CONTENT_DIR   = path.join(__dirname, '../posts/content');
@@ -73,5 +79,4 @@ async function main() {
   rl.close();
 }
 
-async function* [Symbol.asyncIterator]() { for await (const line of rl) yield line; }
 main().catch(e => { console.error(e.message); process.exit(1); });

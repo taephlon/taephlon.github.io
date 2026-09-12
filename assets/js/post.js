@@ -1,4 +1,4 @@
-// ── Markdown → HTML parser ──────────────────────────────────────
+// ── Fast, Zero-Dependency Markdown → HTML Parser ─────────────────────
 function parseMarkdown(md) {
   // Escape HTML entities first
   let html = md
@@ -26,44 +26,48 @@ function parseMarkdown(md) {
   html = html
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>');
 
-    // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;">')
+  // Images
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:24px 0;display:block;" loading="lazy">');
 
-    // Bold & italic
+  // Markdown Tables
+  html = html.replace(/(^\|.+$\n?)+/gm, (tableBlock) => {
+    const lines = tableBlock.trim().split('\n').filter(l => !l.match(/^\|[\s:-|]+\|$/));
+    if (lines.length === 0) return '';
+    const headers = lines[0].split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
+    const rows = lines.slice(1).map(row => {
+      const cells = row.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+    return `<div class="table-wrapper" style="overflow-x:auto;margin:20px 0;"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+
+  // Typography & inline formatting
+  html = html
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-
-    // Blockquotes
-    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
-
-    // Unordered lists
-    .replace(/(^- .+(\n- .+)*)/gm, block => {
-      const items = block.split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
-      return `<ul>${items}</ul>`;
-    })
-
-    // Ordered lists
-    .replace(/(^\d+\. .+(\n\d+\. .+)*)/gm, block => {
-      const items = block.split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
-      return `<ol>${items}</ol>`;
-    })
-
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-
-    // Horizontal rule
+    .replace(/^&gt;\s?(.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/^---$/gm, '<hr>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
-    // Paragraphs — wrap lines that aren't already block elements (ignoring code block placeholders)
-    .replace(/^(?!<[hup]|<ol|<bl|<hr|<pre|__CODE_BLOCK_PLACEHOLDER_\d+__)(.+)$/gm, '<p>$1</p>')
+  // Unordered lists
+  html = html.replace(/(^- .+(\n- .+)*)/gm, block => {
+    const items = block.split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
 
-    // Clean up empty paragraphs
+  // Ordered lists
+  html = html.replace(/(^\d+\. .+(\n\d+\. .+)*)/gm, block => {
+    const items = block.split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // Paragraphs
+  html = html
+    .replace(/^(?!<[hup]|<ol|<ul|<li|<bl|<hr|<div|<table|<thead|<tbody|<tr|<th|<td|<pre|__CODE_BLOCK_PLACEHOLDER_\d+__)(.+)$/gm, '<p>$1</p>')
     .replace(/<p>\s*<\/p>/g, '')
-
-    // Collapse multiple blank lines
     .replace(/\n{3,}/g, '\n\n');
 
   // Restore inline codes
@@ -79,24 +83,26 @@ function parseMarkdown(md) {
   return html;
 }
 
-// ── Post Reader Engine ──────────────────────────────────────────
+// ── Lightweight Post Loader ──────────────────────────────────────────
 const POSTS_URL = './posts/posts.json';
+const $ = id => document.getElementById(id);
 
 async function loadPost() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
 
-  if (!slug) { window.location.href = './index.html'; return; }
+  if (!slug) { window.location.href = './blog.html'; return; }
 
   try {
     const res = await fetch(POSTS_URL);
+    if (!res.ok) throw new Error('Failed to load posts index');
     const posts = await res.json();
     const post = posts.find(p => p.slug === slug);
 
     if (!post) {
       document.body.innerHTML = `<div style="padding:80px;text-align:center;color:#8888a0;font-family:sans-serif">
         <h2 style="font-size:2rem;color:#e8e8ed;margin-bottom:16px">Post not found</h2>
-        <a href="./index.html" style="color:#7c6af7">← Back to home</a>
+        <a href="./blog.html" style="color:#7c6af7">← Back to blog</a>
       </div>`;
       return;
     }
@@ -113,8 +119,10 @@ async function loadPost() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById('post-body').innerHTML =
-      `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
+    const bodyEl = $('post-body');
+    if (bodyEl) {
+      bodyEl.innerHTML = `<p style="color:var(--muted)">⚠ Failed to load post content: ${e.message}</p>`;
+    }
   }
 }
 
@@ -123,51 +131,67 @@ function renderPost(post, contentHTML, allPosts) {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  document.getElementById('post-hero-img').src = post.thumbnail;
-  document.getElementById('post-hero-img').alt = post.title;
-  document.getElementById('post-title').textContent = post.title;
-  document.getElementById('post-date').textContent = dateStr;
-  document.getElementById('post-readtime').textContent = post.readTime;
-  document.getElementById('post-tags').innerHTML =
-    post.tags.map(t => `<span class="post-tag">${t}</span>`).join('');
-  document.getElementById('post-body').innerHTML = contentHTML;
+  const heroImg = $('post-hero-img');
+  if (heroImg) {
+    heroImg.src = post.thumbnail;
+    heroImg.alt = post.title;
+  }
+
+  const titleEl = $('post-title');
+  if (titleEl) titleEl.textContent = post.title;
+
+  const dateEl = $('post-date');
+  if (dateEl) dateEl.textContent = dateStr;
+
+  const readTimeEl = $('post-readtime');
+  if (readTimeEl) readTimeEl.textContent = post.readTime;
+
+  const tagsEl = $('post-tags');
+  if (tagsEl) {
+    tagsEl.innerHTML = (post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('');
+  }
+
+  const bodyEl = $('post-body');
+  if (bodyEl) bodyEl.innerHTML = contentHTML;
 
   // Related posts
-  const related = allPosts
-    .filter(p => p.slug !== post.slug && p.tags.some(t => post.tags.includes(t)))
+  const related = (allPosts || [])
+    .filter(p => p.slug !== post.slug && p.tags && p.tags.some(t => (post.tags || []).includes(t)))
     .slice(0, 3);
 
-  const relatedEl = document.getElementById('related-grid');
-  if (related.length) {
-    relatedEl.innerHTML = related.map(p => `
-      <a class="card" href="post.html?slug=${p.slug}">
-        <div class="card-thumb-wrapper">
-          <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
-        </div>
-        <div class="card-body">
-          <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
-          <h3 class="card-title">${p.title}</h3>
-          <div class="card-meta">
-            <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
-            <span class="card-meta-dot"></span>
-            <span>${p.readTime}</span>
+  const relatedEl = $('related-grid');
+  if (relatedEl) {
+    if (related.length) {
+      relatedEl.innerHTML = related.map(p => `
+        <a class="card" href="post.html?slug=${p.slug}">
+          <div class="card-thumb-wrapper">
+            <img class="card-thumb" src="${p.thumbnail}" alt="${p.title}" loading="lazy">
           </div>
-          <p class="card-desc">${p.description}</p>
-        </div>
-        <div class="card-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-        </div>
-      </a>`).join('');
-  } else {
-    relatedEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No related posts found.</p>';
+          <div class="card-body">
+            <div class="card-tags">${(p.tags || []).map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
+            <h3 class="card-title">${p.title}</h3>
+            <div class="card-meta">
+              <span>${new Date(p.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</span>
+              <span class="card-meta-dot"></span>
+              <span>${p.readTime}</span>
+            </div>
+            <p class="card-desc">${p.description}</p>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+        </a>`).join('');
+    } else {
+      relatedEl.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No related posts found.</p>';
+    }
   }
 }
 
 // ── SEO ──────────────────────────────────────────────────────────
 function updateSEO(post) {
-  document.title = `${post.title} — My Blog`;
+  document.title = `${post.title} — Enver Avisena`;
   const setMeta = (name, content, prop = false) => {
     const attr = prop ? 'property' : 'name';
     let el = document.querySelector(`meta[${attr}="${name}"]`);
@@ -175,7 +199,7 @@ function updateSEO(post) {
     el.setAttribute('content', content);
   };
   setMeta('description', post.description);
-  setMeta('keywords', post.tags.join(', '));
+  setMeta('keywords', (post.tags || []).join(', '));
   setMeta('og:title', post.title, true);
   setMeta('og:description', post.description, true);
   setMeta('og:image', post.thumbnail, true);
@@ -193,8 +217,8 @@ function updateSEO(post) {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     headline: post.title, description: post.description,
     image: post.thumbnail, datePublished: post.date,
-    author: { '@type': 'Person', name: 'Your Name' },
-    keywords: post.tags.join(', ')
+    author: { '@type': 'Person', name: 'Enver Avisena' },
+    keywords: (post.tags || []).join(', ')
   };
   let ldScript = document.getElementById('ld-json');
   if (!ldScript) { ldScript = document.createElement('script'); ldScript.id = 'ld-json'; ldScript.type = 'application/ld+json'; document.head.appendChild(ldScript); }
@@ -203,10 +227,14 @@ function updateSEO(post) {
 
 // ── Reading progress bar ─────────────────────────────────────────
 function initScrollProgress() {
-  const bar = document.getElementById('post-progress');
+  const bar = $('post-progress');
+  if (!bar) return;
   window.addEventListener('scroll', () => {
-    const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-    bar.style.width = Math.min(pct, 100) + '%';
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    if (total > 0) {
+      const pct = (window.scrollY / total) * 100;
+      bar.style.width = Math.min(pct, 100) + '%';
+    }
   }, { passive: true });
 }
 
